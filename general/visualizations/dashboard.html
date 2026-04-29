@@ -434,6 +434,93 @@
     .binder-preview { border: 0; height: auto; overflow: visible; padding: 0; }
     .binder-section { break-inside: avoid; }
   }
+  /* ── Scroll / entrance animations ── */
+  @media (prefers-reduced-motion: no-preference) {
+    .anim {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1);
+    }
+    .anim.visible { opacity: 1; transform: translateY(0); }
+    .anim.d1 { transition-delay: .07s; }
+    .anim.d2 { transition-delay: .14s; }
+    .anim.d3 { transition-delay: .21s; }
+    .anim.d4 { transition-delay: .28s; }
+    .anim.d5 { transition-delay: .35s; }
+
+    .anim-left {
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: opacity .45s cubic-bezier(.16,1,.3,1), transform .45s cubic-bezier(.16,1,.3,1);
+    }
+    .anim-left.visible { opacity: 1; transform: translateX(0); }
+
+    .anim-scale {
+      opacity: 0;
+      transform: scale(.92);
+      transition: opacity .4s ease, transform .4s cubic-bezier(.16,1,.3,1);
+    }
+    .anim-scale.visible { opacity: 1; transform: scale(1); }
+
+    @keyframes dot-pop {
+      from { r: 0; opacity: 0; }
+      to { opacity: .88; }
+    }
+    .matrix-svg circle { animation: dot-pop .35s ease both; }
+    .matrix-svg circle:nth-child(1) { animation-delay: .05s; }
+    .matrix-svg circle:nth-child(2) { animation-delay: .08s; }
+    .matrix-svg circle:nth-child(3) { animation-delay: .11s; }
+    .matrix-svg circle:nth-child(4) { animation-delay: .14s; }
+    .matrix-svg circle:nth-child(5) { animation-delay: .17s; }
+    .matrix-svg circle:nth-child(6) { animation-delay: .20s; }
+    .matrix-svg circle:nth-child(7) { animation-delay: .23s; }
+    .matrix-svg circle:nth-child(8) { animation-delay: .26s; }
+    .matrix-svg circle:nth-child(9) { animation-delay: .29s; }
+    .matrix-svg circle:nth-child(10) { animation-delay: .32s; }
+
+    @keyframes bar-grow {
+      from { transform: scaleY(0); }
+      to { transform: scaleY(1); }
+    }
+    .chart-svg rect[fill] {
+      transform-origin: bottom;
+      animation: bar-grow .4s cubic-bezier(.16,1,.3,1) both;
+    }
+
+    @keyframes row-slide {
+      from { opacity: 0; transform: translateX(-12px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .triage-row { animation: row-slide .3s ease both; }
+    .triage-row:nth-child(1) { animation-delay: .05s; }
+    .triage-row:nth-child(2) { animation-delay: .1s; }
+    .triage-row:nth-child(3) { animation-delay: .15s; }
+    .triage-row:nth-child(4) { animation-delay: .2s; }
+    .triage-row:nth-child(5) { animation-delay: .25s; }
+    .triage-row:nth-child(6) { animation-delay: .3s; }
+    .triage-row:nth-child(7) { animation-delay: .35s; }
+    .triage-row:nth-child(8) { animation-delay: .4s; }
+
+    @keyframes cell-pop {
+      from { opacity: 0; transform: scale(.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .filing-cell { animation: cell-pop .25s ease both; }
+
+    .flag-card {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity .4s ease, transform .4s cubic-bezier(.16,1,.3,1);
+    }
+    .flag-card.visible { opacity: 1; transform: translateY(0); }
+
+    .trace-step {
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: opacity .3s ease, transform .3s ease;
+    }
+    .trace-step.visible { opacity: 1; transform: translateX(0); }
+  }
 </style>
 </head>
 <body>
@@ -455,7 +542,7 @@
 
     <!-- ═══════════════════════ SUMMARY ═══════════════════════ -->
     <section v-if="page==='summary'" class="page summary-page">
-      <div class="hero-strip">
+      <div class="hero-strip anim">
         <div class="hero-copy">
           <div class="eyebrow">Challenge 1 / Zombie Recipients</div>
           <h1>Recipient risk<br><span class="accent">intelligence.</span></h1>
@@ -481,7 +568,7 @@
 
       <div class="summary-grid">
         <!-- Zombie quadrant -->
-        <div class="panel">
+        <div class="panel anim d1">
           <div class="panel-head">
             <div>
               <div class="label">Zombie Quadrant</div>
@@ -545,7 +632,7 @@
         <!-- Right: Triage + review feed -->
         <div class="side-stack">
           <!-- Triage agent -->
-          <div class="panel">
+          <div class="panel anim d2">
             <div class="panel-head">
               <div>
                 <div class="label">Triage Agent</div>
@@ -573,7 +660,7 @@
           </div>
 
           <!-- Review feed -->
-          <div class="panel">
+          <div class="panel anim d3">
             <div class="panel-head">
               <div><div class="label">Highest Exposure</div><h4>Review feed</h4></div>
               <button class="btn sm ghost" @click="page='research'">Research →</button>
@@ -602,7 +689,7 @@
     <section v-if="page==='research'" class="page research-page">
 
       <!-- Left sidebar -->
-      <div class="panel sidebar">
+      <div class="panel sidebar anim-left">
         <div class="sidebar-head">
           <div class="label">Research</div>
           <h3>Find recipients</h3>
@@ -656,7 +743,7 @@
       </div>
 
       <!-- Main case workspace -->
-      <div class="panel profile-layout">
+      <div class="panel profile-layout anim d1">
 
         <!-- Comparison view -->
         <div v-if="comparison" style="flex:1;overflow:auto">
@@ -665,7 +752,7 @@
             <button class="btn sm ghost" @click="comparison=null">← Back to profile</button>
           </div>
           <div class="comparison-grid">
-            <div v-for="p in comparison.profiles" :key="p.identity.entity_id" class="compare-card">
+            <div v-for="p in comparison.profiles" :key="p.identity.entity_id" class="compare-card anim-scale">
               <div class="score-badge" :class="scoreBand(p.score.total)" style="margin-bottom:10px">
                 <span class="score-num">{{ p.score.total }}</span>
                 <span>{{ p.score.band }}</span>
@@ -943,7 +1030,7 @@
 
     <!-- ═══════════════════════ OVERSIGHT ═══════════════════════ -->
     <section v-if="page==='oversight'" class="page oversight-page">
-      <div class="panel panel-pad">
+      <div class="panel panel-pad anim">
         <div class="panel-head" style="padding:0;border:0">
           <div>
             <div class="label">Standing Internal Report</div>
@@ -960,7 +1047,7 @@
           <input v-model.number="filters.days" type="number" min="0" placeholder="Min days raised">
         </div>
       </div>
-      <div class="panel table-scroll">
+      <div class="panel table-scroll anim d1">
         <table>
           <thead><tr><th>Organization</th><th>First raised</th><th>Days</th><th>Status</th><th>Reviewer</th><th class="num">Exposure</th><th>Signal</th></tr></thead>
           <tbody>
@@ -980,7 +1067,7 @@
 
     <!-- ═══════════════════════ BINDER ═══════════════════════ -->
     <section v-if="page==='binder'" class="page binder-page printable-page">
-      <aside class="panel panel-pad">
+      <aside class="panel panel-pad anim-left">
         <div class="label">Committee Binder</div>
         <h2 style="margin-top:6px">Briefing package</h2>
         <p class="sub" style="margin-top:8px">Generate from a selected case. Use browser print to save PDF.</p>
@@ -993,7 +1080,7 @@
         </div>
         <div v-else class="empty" style="margin-top:14px">Select a case on Research first.</div>
       </aside>
-      <section class="binder-preview" v-if="binder">
+      <section class="binder-preview anim d1" v-if="binder">
         <h1>{{ binder.title }}</h1>
         <p class="mono" style="font-size:11px;margin-top:4px;color:#666">Generated {{ binder.generated_at }}</p>
         <div class="binder-section"><h2>Organization Overview</h2>
@@ -1147,12 +1234,29 @@ createApp({
     },
   },
 
+  watch: {
+    page() { this.$nextTick(() => this._observeAnimated()); },
+    profile() { this.$nextTick(() => this._observeAnimated()); },
+    profileTab() { this.$nextTick(() => this._observeAnimated()); },
+  },
+
   async mounted() {
+    this._io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) e.target.classList.add('visible');
+      }
+    }, { threshold: 0.05 });
     await this.refresh();
     await this.loadOversight(false);
+    this._observeAnimated();
   },
 
   methods: {
+    _observeAnimated() {
+      if (!this._io) return;
+      document.querySelectorAll('.anim:not(.visible),.anim-left:not(.visible),.anim-scale:not(.visible),.flag-card:not(.visible),.trace-step:not(.visible)')
+        .forEach(el => this._io.observe(el));
+    },
     async fetchJson(url, options) {
       const res = await fetch(url, options);
       if (!res.ok) {
