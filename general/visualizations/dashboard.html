@@ -2,64 +2,73 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Recipient Risk Intelligence Workspace</title>
+<title>Recipient Risk Intelligence</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <style>
   :root {
     --cream: #f6ebe3;
-    --dark: #272727;
-    --dark-border: #585858;
+    --dark: #1e1e1e;
+    --dark-border: #555;
     --border: #cdc4bd;
     --accent: #932f2f;
+    --accent-soft: rgba(147,47,47,.12);
     --white: #ffffff;
     --pale-red: #ffdede;
-    --green: #637f57;
-    --amber: #9b7b29;
+    --green: #476b36;
+    --green-soft: rgba(71,107,54,.1);
+    --amber: #8a6b1e;
+    --amber-soft: rgba(138,107,30,.12);
+    --surface: rgba(246,235,227,.88);
+    --surface-2: rgba(255,255,255,.25);
   }
-
   * { box-sizing: border-box; }
   body {
     margin: 0;
     background: var(--cream);
     color: var(--dark);
     font-family: "Financier Text", "Times New Roman", serif;
-    font-size: 16px;
-    line-height: 1.45;
+    font-size: 15px;
+    line-height: 1.5;
     overflow: hidden;
   }
-  h1, h2, h3 {
+  h1,h2,h3,h4 {
     margin: 0;
     font-family: "Soehne Kraftig", Arial, sans-serif;
     font-weight: 400;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     line-height: 1;
   }
-  h1 { font-size: clamp(34px, 4.4vw, 58px); letter-spacing: -0.045em; }
-  h2 { font-size: clamp(28px, 3vw, 42px); }
-  h3 { font-size: 23px; }
-  button, input, select, textarea { font: inherit; }
+  h1 { font-size: clamp(28px, 3.6vw, 52px); letter-spacing: -0.045em; }
+  h2 { font-size: clamp(20px, 2.4vw, 34px); }
+  h3 { font-size: 19px; }
+  h4 { font-size: 14px; letter-spacing: 0; line-height: 1.3; }
+  button,input,select,textarea { font: inherit; }
+  a { color: inherit; }
 
-  .mono, .btn, .nav-btn, .label, th, .tag, .status, .metric-label, .small-caps {
+  .mono,.btn,.nav-btn,.label,th,.tag,.status,.metric-label,.small-caps,.tab-btn {
     font-family: "Founders Grotesk Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     text-transform: uppercase;
-    letter-spacing: 0.07em;
+    letter-spacing: 0.06em;
   }
 
+  /* ── Layout ── */
   .app {
     height: 100vh;
     display: grid;
-    grid-template-rows: 82px 1fr;
+    grid-template-rows: 76px 1fr;
+    overflow: hidden;
     background:
-      linear-gradient(90deg, rgba(205,196,189,.42) 1px, transparent 1px) 0 0 / 25% 100%,
-      linear-gradient(rgba(205,196,189,.28) 1px, transparent 1px) 0 0 / 100% 96px,
+      linear-gradient(90deg, rgba(205,196,189,.35) 1px, transparent 1px) 0 0 / 25% 100%,
+      linear-gradient(rgba(205,196,189,.22) 1px, transparent 1px) 0 0 / 100% 76px,
       var(--cream);
   }
-
   .topbar {
     display: grid;
-    grid-template-columns: 164px 1fr 180px;
+    grid-template-columns: 152px 1fr 160px;
     border-bottom: 1px solid var(--dark);
+    position: relative;
+    z-index: 10;
   }
   .wordmark {
     display: flex;
@@ -69,390 +78,359 @@
     color: var(--cream);
     border-right: 1px solid var(--dark);
     font-family: "Soehne Kraftig", Arial, sans-serif;
-    font-size: 25px;
-    line-height: .92;
+    font-size: 22px;
+    line-height: .9;
     letter-spacing: -0.04em;
     text-align: center;
+    padding: 0 12px;
   }
-  .nav {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-  }
-  .nav-btn, .backend-cell {
+  .nav { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .nav-btn,.backend-cell {
     border: 0;
     border-right: 1px solid var(--dark);
     background: transparent;
     color: var(--dark);
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
+    transition: background .12s, color .12s;
   }
-  .nav-btn.active {
-    background: var(--dark);
-    color: var(--cream);
-  }
+  .nav-btn:hover { background: rgba(30,30,30,.06); }
+  .nav-btn.active { background: var(--dark); color: var(--cream); }
   .backend-cell {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--dark-border);
-    cursor: default;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--dark-border); cursor: default; font-size: 10px;
   }
+  .workspace { min-height: 0; padding: 18px; overflow: hidden; }
+  .page { height: 100%; min-height: 0; display: grid; gap: 16px; }
 
-  .workspace {
-    min-height: 0;
-    padding: 22px;
-    overflow: hidden;
-  }
-  .page {
-    height: 100%;
-    min-height: 0;
-    display: grid;
-    gap: 18px;
-  }
-  .summary-page { grid-template-rows: 150px minmax(0, 1fr); }
-  .research-page { grid-template-columns: 360px minmax(0, 1fr); }
-  .oversight-page { grid-template-rows: auto minmax(0, 1fr); }
-  .binder-page { grid-template-columns: 380px minmax(0, 1fr); }
-
+  /* ── Summary page ── */
+  .summary-page { grid-template-rows: 130px minmax(0, 1fr); }
   .hero-strip {
     display: grid;
-    grid-template-columns: 1.1fr repeat(4, .55fr);
+    grid-template-columns: 1.2fr repeat(4, .5fr);
     border: 1px solid var(--dark);
-    background: rgba(246,235,227,.84);
-    min-height: 0;
+    background: var(--surface);
   }
-  .hero-copy, .metric {
-    padding: 16px;
-    border-right: 1px solid var(--border);
-  }
+  .hero-copy,.metric { padding: 14px 18px; border-right: 1px solid var(--border); }
+  .hero-copy { padding: 14px 22px; }
   .metric:last-child { border-right: 0; }
-  .accent { color: var(--accent); }
-  .dek { margin: 8px 0 0; max-width: 760px; font-size: 16px; line-height: 1.3; color: var(--dark-border); }
-  .metric-label { font-size: 11px; color: var(--dark-border); }
+  .eyebrow { font-family: "Founders Grotesk Mono", ui-monospace, monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--dark-border); margin-bottom: 4px; }
+  .metric-label { font-size: 10px; color: var(--dark-border); }
   .metric-value {
-    margin-top: 20px;
+    margin-top: 16px;
     font-family: "Soehne Kraftig", Arial, sans-serif;
-    font-size: clamp(27px, 2.6vw, 40px);
+    font-size: clamp(22px, 2.4vw, 36px);
     line-height: .9;
     letter-spacing: -0.04em;
     font-variant-numeric: tabular-nums;
   }
-
-  .panel {
-    border: 1px solid var(--dark);
-    background: rgba(246,235,227,.82);
-    min-height: 0;
-    overflow: hidden;
-  }
-  .panel-pad { padding: 20px; }
-  .panel-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 14px;
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--border);
-  }
-  .panel-head p { margin: 5px 0 0; color: var(--dark-border); line-height: 1.25; }
-
+  .accent { color: var(--accent); }
+  .dek { margin: 6px 0 0; font-size: 14px; line-height: 1.35; color: var(--dark-border); max-width: 540px; }
   .summary-grid {
     min-height: 0;
     display: grid;
-    grid-template-columns: 1.2fr .8fr;
-    gap: 18px;
+    grid-template-columns: 1.4fr .6fr;
+    gap: 16px;
   }
-  .matrix-body {
-    height: calc(100% - 78px);
-    min-height: 0;
-    display: grid;
-    grid-template-rows: 1fr auto;
-  }
-  .matrix-wrap {
-    position: relative;
-    min-height: 0;
-    padding: 14px;
-  }
-  .matrix-svg {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    display: block;
-    background: rgba(255,255,255,.25);
-  }
+
+  /* ── Zombie matrix ── */
+  .matrix-body { height: calc(100% - 72px); min-height: 0; display: grid; grid-template-rows: 1fr auto; }
+  .matrix-wrap { position: relative; min-height: 0; padding: 12px; }
+  .matrix-svg { width: 100%; height: 100%; min-height: 0; display: block; }
   .matrix-labels {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 12px 18px 16px;
-    color: var(--dark-border);
-    font-size: 11px;
+    display: flex; flex-wrap: wrap; gap: 12px;
+    padding: 10px 16px 14px;
+    color: var(--dark-border); font-size: 10px;
     border-top: 1px solid var(--border);
   }
-  .legend-dot {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    margin-right: 6px;
+  .legend-dot { display: inline-block; width: 9px; height: 9px; margin-right: 5px; border-radius: 50%; }
+
+  /* ── Right side stack ── */
+  .side-stack { display: grid; grid-template-rows: auto minmax(0,1fr); gap: 16px; min-height: 0; }
+
+  /* ── Panels ── */
+  .panel {
     border: 1px solid var(--dark);
+    background: var(--surface);
+    min-height: 0;
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .panel-head p { margin: 4px 0 0; color: var(--dark-border); font-size: 13px; line-height: 1.3; }
+  .panel-pad { padding: 16px; }
+
+  /* ── Triage panel ── */
+  .triage-panel { padding: 14px 16px; }
+  .triage-queue {
+    display: flex; flex-direction: column; gap: 6px; margin-top: 10px;
+    max-height: 180px; overflow-y: auto;
+  }
+  .triage-row {
+    display: grid; grid-template-columns: 1fr auto auto;
+    align-items: center; gap: 8px;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    cursor: pointer;
+    transition: background .1s;
+  }
+  .triage-row:hover { background: var(--accent-soft); }
+
+  /* ── Research page ── */
+  .research-page { grid-template-columns: 320px minmax(0,1fr); }
+  .sidebar { display: flex; flex-direction: column; gap: 0; overflow: hidden; }
+  .sidebar-head { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .search-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 8px; }
+  .search-results { flex: 0 0 auto; overflow-y: auto; max-height: 200px; border-bottom: 1px solid var(--border); }
+  .compare-bar {
+    flex-shrink: 0;
+    display: grid; grid-template-columns: 1fr auto auto;
+    gap: 8px; align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .compare-slots { display: flex; gap: 6px; flex-wrap: wrap; }
+  .slot {
+    border: 1px solid var(--dark); padding: 5px 8px;
+    font-family: "Founders Grotesk Mono", ui-monospace, monospace;
+    font-size: 9px; text-transform: uppercase; letter-spacing: .06em;
+    max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .queue-list { flex: 1; overflow-y: auto; }
+
+  /* ── Profile / Case Workspace ── */
+  .profile-layout { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+  .profile-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    flex-shrink: 0;
+  }
+  .profile-name-block { display: flex; flex-direction: column; gap: 3px; }
+  .profile-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .score-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--dark); padding: 6px 10px;
+    font-family: "Founders Grotesk Mono", ui-monospace, monospace;
+    font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+  }
+  .score-badge.high { background: var(--accent); color: var(--cream); border-color: var(--accent); }
+  .score-badge.medium { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+  .score-badge.low { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+  .score-num { font-size: 18px; line-height: 1; }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; border-bottom: 1px solid var(--dark); flex-shrink: 0; }
+  .tab-btn {
+    border: 0; border-right: 1px solid var(--border);
+    background: transparent; color: var(--dark-border);
+    padding: 9px 14px; cursor: pointer; font-size: 10px;
+    transition: background .12s, color .12s;
+  }
+  .tab-btn:hover { background: rgba(30,30,30,.05); color: var(--dark); }
+  .tab-btn.active { background: var(--dark); color: var(--cream); }
+  .tab-content { flex: 1; min-height: 0; overflow: auto; }
+
+  /* ── Overview tab ── */
+  .overview-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .overview-col { padding: 16px; border-right: 1px solid var(--border); }
+  .overview-col:last-child { border-right: 0; }
+  .fact-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border); margin-bottom: 14px;
+  }
+  .fact { padding: 10px 12px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .fact:nth-child(even) { border-right: 0; }
+  .fact:nth-last-child(-n+2) { border-bottom: 0; }
+  .fact .val {
+    margin-top: 5px;
+    font-family: "Soehne Kraftig", Arial, sans-serif;
+    font-size: 22px; line-height: 1; letter-spacing: -0.03em;
   }
 
-  .side-stack {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    gap: 18px;
-    min-height: 0;
+  /* Score breakdown */
+  .score-breakdown { display: flex; flex-direction: column; gap: 8px; }
+  .score-component { }
+  .score-component-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 4px; font-size: 12px;
+  }
+  .score-bar-track { background: var(--border); height: 6px; border-radius: 0; }
+  .score-bar-fill { height: 100%; transition: width .4s ease; }
+  .fill-high { background: var(--accent); }
+  .fill-medium { background: var(--amber); }
+  .fill-low { background: var(--green); }
+  .fill-zero { background: var(--border); }
+
+  /* Sources */
+  .source-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .chip {
+    border: 1px solid var(--dark); padding: 3px 8px;
+    font-family: "Founders Grotesk Mono", ui-monospace, monospace;
+    font-size: 9px; text-transform: uppercase; letter-spacing: .06em;
+    background: var(--surface-2);
   }
 
-  .table-scroll, .scroll {
-    height: 100%;
-    min-height: 0;
-    overflow: auto;
+  /* ── Timeline tab ── */
+  .timeline-inner { padding: 16px; display: flex; flex-direction: column; gap: 22px; }
+  .chart-title { font-family: "Founders Grotesk Mono", ui-monospace, monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--dark-border); margin-bottom: 8px; }
+  .chart-svg { width: 100%; display: block; overflow: visible; }
+  .filing-strip { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+  .filing-cell {
+    width: 36px; height: 36px; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Founders Grotesk Mono", ui-monospace, monospace;
+    font-size: 9px; text-transform: uppercase;
   }
+  .filing-cell.filed { background: var(--green); color: var(--cream); border-color: var(--green); }
+  .filing-cell.gap { background: var(--pale-red); border-color: var(--accent); }
+
+  /* ── Flags tab ── */
+  .flags-inner { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .flag-card { border: 1px solid var(--dark); }
+  .flag-card-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 10px; padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .flag-label { font-size: 14px; line-height: 1.3; font-family: "Soehne Kraftig", Arial, sans-serif; font-weight: 400; }
+  .flag-code { font-family: "Founders Grotesk Mono", ui-monospace, monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; color: var(--dark-border); margin-top: 2px; }
+  .flag-body { display: grid; grid-template-columns: 1fr 1fr; }
+  .flag-col { padding: 12px 14px; border-right: 1px solid var(--border); }
+  .flag-col:last-child { border-right: 0; }
+  .flag-col-title { font-family: "Founders Grotesk Mono", ui-monospace, monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .07em; color: var(--dark-border); margin-bottom: 6px; }
+  .evidence-row { font-family: ui-monospace, monospace; font-size: 11px; line-height: 1.4; color: var(--dark-border); }
+  .source-line { font-family: ui-monospace, monospace; font-size: 10px; color: var(--dark-border); margin-top: 4px; }
+  .limitation-text { font-size: 12px; line-height: 1.4; color: var(--amber); margin-top: 4px; }
+  .steelman-text { font-size: 13px; line-height: 1.45; color: var(--dark-border); font-style: italic; }
+
+  /* ── AI Analysis tab ── */
+  .ai-inner { padding: 16px; }
+  .ai-generate-area { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; }
+  .ai-explanation { border: 1px solid var(--border); }
+  .ai-section { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .ai-section:last-child { border-bottom: 0; }
+  .ai-section-title { font-family: "Founders Grotesk Mono", ui-monospace, monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--dark-border); margin-bottom: 6px; }
+  .ai-summary-text { font-size: 14px; line-height: 1.55; }
+  .ai-question { padding: 5px 0; border-top: 1px solid var(--border); font-size: 13px; line-height: 1.4; }
+  .ai-question:first-child { border-top: 0; }
+  .ai-limitation { font-size: 12px; line-height: 1.4; color: var(--dark-border); padding: 4px 0; }
+  .ai-unavail { border: 1px solid var(--border); padding: 16px; color: var(--dark-border); font-size: 13px; line-height: 1.45; }
+
+  /* ── Review tab ── */
+  .review-inner { padding: 16px; display: flex; flex-direction: column; gap: 18px; }
+  .review-section-title { font-family: "Founders Grotesk Mono", ui-monospace, monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--dark-border); margin-bottom: 8px; }
+  .agent-trace { border: 1px solid var(--dark); }
+  .trace-step { display: grid; grid-template-columns: 50px 180px 1fr; border-top: 1px solid var(--border); }
+  .trace-step:first-child { border-top: 0; }
+  .trace-step > div { padding: 9px 10px; border-right: 1px solid var(--border); font-size: 12px; }
+  .trace-step > div:last-child { border-right: 0; }
+  .json-ish { font-family: ui-monospace, monospace; font-size: 11px; white-space: pre-wrap; word-break: break-word; line-height: 1.4; }
+  .disposition-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .audit-list { border: 1px solid var(--dark); }
+  .audit-entry { display: grid; grid-template-columns: 90px 150px 1fr; border-top: 1px solid var(--border); }
+  .audit-entry:first-child { border-top: 0; }
+  .audit-entry > div { padding: 8px 10px; border-right: 1px solid var(--border); font-size: 12px; }
+  .audit-entry > div:last-child { border-right: 0; }
+
+  /* ── Comparison ── */
+  .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; padding: 16px; }
+  .compare-card { border: 1px solid var(--dark); padding: 14px; background: var(--surface-2); }
+
+  /* ── Oversight page ── */
+  .oversight-page { grid-template-rows: auto minmax(0,1fr); }
+  .filter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px; }
+
+  /* ── Binder page ── */
+  .binder-page { grid-template-columns: 340px minmax(0,1fr); }
+  .binder-preview { height: 100%; overflow: auto; background: #fff; color: #111; padding: 36px; border: 1px solid var(--dark); }
+  .binder-preview h1 { color: var(--accent); }
+  .binder-section { padding: 16px 0; border-top: 1px solid #ccc; }
+
+  /* ── Tables ── */
+  .table-scroll,.scroll { height: 100%; min-height: 0; overflow: auto; }
   table { width: 100%; border-collapse: collapse; }
   th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background: var(--dark);
-    color: var(--cream);
-    text-align: left;
-    padding: 12px;
-    font-size: 10px;
-    font-weight: 400;
+    position: sticky; top: 0; z-index: 2;
+    background: var(--dark); color: var(--cream);
+    text-align: left; padding: 10px 12px;
+    font-size: 9px; font-weight: 400;
     border-right: 1px solid var(--dark-border);
   }
-  td {
-    padding: 12px;
-    border-top: 1px solid var(--border);
-    border-right: 1px solid var(--border);
-    vertical-align: top;
-  }
+  td { padding: 10px 12px; border-top: 1px solid var(--border); border-right: 1px solid var(--border); vertical-align: top; }
   tr.clickable { cursor: pointer; }
-  tr.clickable:hover td, tr.selected td { background: var(--pale-red); }
-  .org-name {
-    font-family: "Soehne Kraftig", Arial, sans-serif;
-    font-size: 19px;
-    line-height: 1.05;
-  }
-  .sub { color: var(--dark-border); font-size: 13px; }
+  tr.clickable:hover td, tr.selected td { background: var(--accent-soft); }
+  .org-name { font-family: "Soehne Kraftig", Arial, sans-serif; font-size: 16px; line-height: 1.1; }
+  .sub { color: var(--dark-border); font-size: 12px; margin-top: 2px; }
   .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
+  /* ── Buttons & inputs ── */
   .btn {
-    border: 1px solid var(--dark);
-    border-radius: 0;
-    background: var(--dark);
-    color: var(--cream);
-    padding: 12px 14px;
-    cursor: pointer;
-    font-size: 11px;
+    border: 1px solid var(--dark); border-radius: 0;
+    background: var(--dark); color: var(--cream);
+    padding: 10px 14px; cursor: pointer; font-size: 10px;
+    transition: opacity .12s; white-space: nowrap;
   }
   .btn.accent-btn { background: var(--accent); border-color: var(--accent); }
   .btn.ghost { background: transparent; color: var(--dark); }
-  .btn:disabled { opacity: .45; cursor: wait; }
+  .btn.sm { padding: 7px 10px; font-size: 9px; }
+  .btn:disabled { opacity: .4; cursor: wait; }
+  .btn:not(:disabled):hover { opacity: .85; }
   input, select, textarea {
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 0;
-    background: var(--white);
-    color: #333;
-    padding: 12px;
+    width: 100%; border: 1px solid var(--border); border-radius: 0;
+    background: var(--white); color: var(--dark); padding: 10px 12px;
+    outline: none;
   }
-  textarea { min-height: 84px; resize: vertical; }
-  .control-row {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-  .filter-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-  }
-  .tag, .status {
-    display: inline-block;
-    border: 1px solid var(--dark);
-    padding: 4px 7px;
-    margin: 0 4px 4px 0;
-    font-size: 10px;
-    line-height: 1;
+  input:focus, select:focus, textarea:focus { border-color: var(--dark); }
+  textarea { min-height: 72px; resize: vertical; }
+
+  /* ── Misc ── */
+  .tag,.status {
+    display: inline-block; border: 1px solid var(--dark);
+    padding: 3px 6px; margin: 0 3px 3px 0; font-size: 9px; line-height: 1;
     background: var(--cream);
   }
   .status.high { background: var(--accent); color: var(--cream); border-color: var(--accent); }
-  .status.medium { background: var(--pale-red); color: var(--dark); }
-  .status.low { color: var(--dark-border); }
+  .status.medium { background: var(--amber-soft); color: var(--amber); border-color: var(--amber); }
+  .status.low { background: var(--green-soft); color: var(--green); border-color: var(--green); }
+  .empty { border: 1px solid var(--border); padding: 18px; color: var(--dark-border); font-size: 13px; }
+  .loading-toast,.error-toast {
+    position: fixed; right: 16px; bottom: 16px; z-index: 100;
+    border: 1px solid var(--dark); background: var(--dark); color: var(--cream);
+    padding: 10px 14px; font-family: "Founders Grotesk Mono", ui-monospace, monospace;
+    font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
+    animation: fadein .15s ease;
+  }
+  .error-toast { left: 16px; right: auto; background: var(--pale-red); color: var(--dark); border-color: var(--accent); }
+  @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; } }
 
-  .compare-bar {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    gap: 10px;
-    align-items: center;
-    border-top: 1px solid var(--border);
-    padding-top: 12px;
-    margin-top: 12px;
-  }
-  .compare-slots {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .slot {
-    border: 1px solid var(--dark);
-    padding: 8px 10px;
-    background: var(--cream);
-    max-width: 220px;
-  }
-  .profile-layout {
-    height: 100%;
-    min-height: 0;
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-  .profile-grid {
-    min-height: 0;
-    display: grid;
-    grid-template-columns: .85fr 1.15fr;
-    gap: 18px;
-    padding: 18px;
-  }
-  .fact-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    border-top: 1px solid var(--border);
-    border-left: 1px solid var(--border);
-  }
-  .fact {
-    padding: 13px;
-    border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-  .fact .value {
-    margin-top: 8px;
-    font-family: "Soehne Kraftig", Arial, sans-serif;
-    font-size: 26px;
-    line-height: 1;
-  }
-  .flag-card {
-    border: 1px solid var(--dark);
-    margin-bottom: 12px;
-    background: rgba(255,255,255,.25);
-  }
-  .flag-card-head {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .flag-card-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-  .flag-card-body > div {
-    padding: 12px;
-    border-right: 1px solid var(--border);
-  }
-  .flag-card-body > div:last-child { border-right: 0; }
-  .citation {
-    display: block;
-    color: var(--dark);
-    text-decoration: underline;
-    margin-top: 5px;
-    word-break: break-word;
-  }
-  .agent-trace, .audit-list {
-    border: 1px solid var(--dark);
-  }
-  .trace-step, .audit-entry {
-    display: grid;
-    grid-template-columns: 58px 190px 1fr;
-    border-top: 1px solid var(--border);
-  }
-  .trace-step:first-child, .audit-entry:first-child { border-top: 0; }
-  .trace-step div, .audit-entry div {
-    padding: 10px;
-    border-right: 1px solid var(--border);
-  }
-  .trace-step div:last-child, .audit-entry div:last-child { border-right: 0; }
-  .json-ish {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 12px;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  .comparison-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 12px;
-  }
-  .compare-card {
-    border: 1px solid var(--dark);
-    padding: 14px;
-    background: rgba(255,255,255,.22);
-  }
-  .binder-preview {
-    height: 100%;
-    overflow: auto;
-    background: #fff;
-    color: #111;
-    padding: 36px;
-    border: 1px solid var(--dark);
-  }
-  .binder-preview h1 { color: var(--accent); }
-  .binder-section {
-    padding: 18px 0;
-    border-top: 1px solid #bbb;
-  }
-  .empty {
-    border: 1px solid var(--border);
-    padding: 22px;
-    color: var(--dark-border);
-  }
-  .loading, .error {
-    position: fixed;
-    right: 18px;
-    bottom: 18px;
-    z-index: 10;
-    border: 1px solid var(--dark);
-    background: var(--dark);
-    color: var(--cream);
-    padding: 12px 14px;
-  }
-  .error {
-    left: 18px;
-    right: auto;
-    background: var(--pale-red);
-    color: var(--dark);
-    border-color: var(--accent);
-  }
-
-  @media (max-width: 1100px) {
-    .app { height: 100vh; }
-    .workspace { overflow: hidden; padding: 14px; }
-    .topbar { grid-template-columns: 132px 1fr 110px; }
-    .wordmark { font-size: 21px; }
-    .nav-btn { font-size: 10px; }
-    .summary-page { grid-template-rows: 118px minmax(0, 1fr); gap: 12px; }
-    .hero-strip { grid-template-columns: 1.3fr repeat(2, .7fr); }
+  @media (max-width: 1200px) {
+    .topbar { grid-template-columns: 120px 1fr 100px; }
+    .wordmark { font-size: 18px; }
+    .nav-btn { font-size: 9px; }
+    .summary-page { grid-template-rows: 108px minmax(0,1fr); gap: 12px; }
+    .hero-strip { grid-template-columns: 1.4fr repeat(2, .6fr); }
     .hero-strip .metric:nth-last-child(-n+2) { display: none; }
-    .hero-copy, .metric { padding: 12px; }
-    .hero-copy h1 { font-size: 29px; line-height: .92; }
-    .dek { display: none; }
-    .metric-value { margin-top: 18px; font-size: 30px; }
-    .summary-grid { grid-template-columns: 1fr; grid-template-rows: 1.45fr .65fr; gap: 12px; min-height: 0; }
-    .side-stack { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; gap: 12px; min-height: 0; }
-    .matrix-body { height: calc(100% - 82px); }
-    .research-page { grid-template-columns: 300px minmax(0, 1fr); }
-    .binder-page { grid-template-columns: 300px minmax(0, 1fr); }
-    .profile-grid { grid-template-columns: 1fr; overflow: auto; }
-    .filter-grid { grid-template-columns: repeat(2, 1fr); }
-    .org-name { font-size: 16px; }
+    .summary-grid { grid-template-columns: 1fr; grid-template-rows: 1.6fr auto; }
+    .research-page { grid-template-columns: 280px minmax(0,1fr); }
+    .binder-page { grid-template-columns: 280px minmax(0,1fr); }
+    .overview-grid { grid-template-columns: 1fr; }
+    .flag-body { grid-template-columns: 1fr; }
+    .flag-col { border-right: 0; border-bottom: 1px solid var(--border); }
   }
-
   @media print {
     body { overflow: visible; background: #fff; }
-    .topbar, .workspace > :not(.printable-page), .btn, .loading, .error { display: none !important; }
-    .app, .workspace, .page, .binder-page { display: block; height: auto; padding: 0; background: #fff; }
+    .topbar,.workspace > :not(.printable-page),.btn,.loading-toast,.error-toast { display: none !important; }
+    .app,.workspace,.page,.binder-page { display: block; height: auto; padding: 0; background: #fff; }
     .binder-preview { border: 0; height: auto; overflow: visible; padding: 0; }
     .binder-section { break-inside: avoid; }
   }
@@ -460,123 +438,157 @@
 </head>
 <body>
 <div id="app" class="app">
+
+  <!-- ── Top bar ── -->
   <header class="topbar">
     <div class="wordmark">Recipient<br>Risk</div>
     <nav class="nav" aria-label="Workspace">
-      <button class="nav-btn" :class="{active: page === 'summary'}" @click="page = 'summary'">Summary</button>
-      <button class="nav-btn" :class="{active: page === 'research'}" @click="page = 'research'">Research + Compare</button>
-      <button class="nav-btn" :class="{active: page === 'oversight'}" @click="openOversight">Oversight</button>
-      <button class="nav-btn" :class="{active: page === 'binder'}" @click="page = 'binder'">Committee Binder</button>
+      <button class="nav-btn" :class="{active: page==='summary'}" @click="page='summary'">Summary</button>
+      <button class="nav-btn" :class="{active: page==='research'}" @click="page='research'">Research + Compare</button>
+      <button class="nav-btn" :class="{active: page==='oversight'}" @click="openOversight">Oversight</button>
+      <button class="nav-btn" :class="{active: page==='binder'}" @click="page='binder'">Committee Binder</button>
     </nav>
     <div class="backend-cell mono">{{ health.backend || 'BigQuery' }}</div>
   </header>
 
   <main class="workspace">
-    <section v-if="page === 'summary'" class="page summary-page">
+
+    <!-- ═══════════════════════ SUMMARY ═══════════════════════ -->
+    <section v-if="page==='summary'" class="page summary-page">
       <div class="hero-strip">
         <div class="hero-copy">
-          <div class="label">Challenge 1 / Zombie Recipients</div>
+          <div class="eyebrow">Challenge 1 / Zombie Recipients</div>
           <h1>Recipient risk<br><span class="accent">intelligence.</span></h1>
-          <p class="dek">One summary workspace for the portfolio, one research workspace for specific organizations, comparisons, evidence, and review actions.</p>
+          <p class="dek">Search, score, and flag organizations where public funding may have preceded inactivity.</p>
         </div>
-        <div class="metric"><div class="metric-label">Recipients in queue</div><div class="metric-value">{{ fmt(summary.orgs) }}</div></div>
-        <div class="metric"><div class="metric-label">Funding shown</div><div class="metric-value">{{ fmtMoney(summary.funding) }}</div></div>
-        <div class="metric"><div class="metric-label">Over 80 percent</div><div class="metric-value">{{ fmt(summary.over80) }}</div></div>
-        <div class="metric"><div class="metric-label">Unactioned flags</div><div class="metric-value">{{ fmt(oversightRows.length || summary.orgs) }}</div></div>
+        <div class="metric">
+          <div class="metric-label">Recipients in queue</div>
+          <div class="metric-value">{{ fmt(summary.orgs) }}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Total funding shown</div>
+          <div class="metric-value">{{ fmtMoney(summary.funding) }}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Over 80% dependency</div>
+          <div class="metric-value">{{ fmt(summary.over80) }}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">High priority</div>
+          <div class="metric-value accent">{{ fmt(summary.highPriority) }}</div>
+        </div>
       </div>
 
       <div class="summary-grid">
+        <!-- Zombie quadrant -->
         <div class="panel">
           <div class="panel-head">
             <div>
               <div class="label">Zombie Quadrant</div>
-              <h2>Dependency x post-funding activity</h2>
-              <p>Controlled matrix: red lines mark 70%, 80%, and 12 months. Click a dot to research.</p>
+              <h3>Funding dependency × post-funding activity</h3>
+              <p>Top-right zone: high dependency, no later activity observed. Click a dot to open the case.</p>
             </div>
-            <button class="btn accent-btn" @click="refresh" :disabled="loading">Refresh</button>
+            <button class="btn sm" @click="refresh" :disabled="loading">Refresh</button>
           </div>
           <div class="matrix-body">
             <div class="matrix-wrap">
-              <svg class="matrix-svg" viewBox="0 0 1000 560" preserveAspectRatio="none" role="img" aria-label="Zombie quadrant">
-                <rect x="0" y="0" width="1000" height="560" fill="rgba(255,255,255,.18)"></rect>
-                <g stroke="#cdc4bd" stroke-width="1">
-                  <line v-for="x in [0,200,400,600,800,1000]" :x1="x" y1="0" :x2="x" y2="560"></line>
-                  <line v-for="y in [0,112,224,336,448,560]" x1="0" :y1="y" x2="1000" :y2="y"></line>
+              <svg class="matrix-svg" viewBox="0 0 1000 520" preserveAspectRatio="none" role="img" aria-label="Zombie quadrant scatter plot">
+                <rect x="0" y="0" width="1000" height="520" fill="rgba(255,255,255,.14)"/>
+                <!-- Grid -->
+                <g stroke="rgba(205,196,189,.5)" stroke-width="1">
+                  <line v-for="x in [200,400,600,800]" :x1="x" y1="0" :x2="x" y2="520"/>
+                  <line v-for="y in [104,208,312,416]" x1="0" :y1="y" x2="1000" :y2="y"/>
                 </g>
-                <rect :x="xScale(80)" y="0" :width="1000 - xScale(80)" :height="yScale(12)" fill="#ffdede" opacity=".75"></rect>
-                <g stroke="#932f2f" stroke-width="3" stroke-dasharray="10 8">
-                  <line :x1="xScale(70)" y1="0" :x2="xScale(70)" y2="560"></line>
-                  <line :x1="xScale(80)" y1="0" :x2="xScale(80)" y2="560"></line>
-                  <line x1="0" :y1="yScale(12)" x2="1000" :y2="yScale(12)"></line>
+                <!-- Zombie zone highlight -->
+                <rect :x="xScale(80)" y="0" :width="1000-xScale(80)" :height="yScale(12)" fill="rgba(147,47,47,.08)"/>
+                <!-- Reference lines -->
+                <g stroke="#932f2f" stroke-width="2" stroke-dasharray="8 6">
+                  <line :x1="xScale(70)" y1="0" :x2="xScale(70)" y2="520"/>
+                  <line :x1="xScale(80)" y1="0" :x2="xScale(80)" y2="520"/>
+                  <line x1="0" :y1="yScale(12)" x2="1000" :y2="yScale(12)"/>
                 </g>
-                <text :x="xScale(70) + 8" y="22" class="mono" fill="#932f2f" font-size="18">70%</text>
-                <text :x="xScale(80) + 8" y="46" class="mono" fill="#932f2f" font-size="18">80%</text>
-                <text x="18" :y="yScale(12) - 10" class="mono" fill="#932f2f" font-size="18">12 MONTHS</text>
-                <text x="805" y="34" class="mono" fill="#932f2f" font-size="20">ZOMBIE ZONE</text>
+                <!-- Labels -->
+                <text :x="xScale(70)+6" y="18" fill="#932f2f" font-size="16" font-family="monospace" text-transform="uppercase">70%</text>
+                <text :x="xScale(80)+6" y="40" fill="#932f2f" font-size="16" font-family="monospace">80%</text>
+                <text x="14" :y="yScale(12)-7" fill="#932f2f" font-size="15" font-family="monospace">12 MONTHS</text>
+                <text x="750" y="30" fill="rgba(147,47,47,.7)" font-size="18" font-family="monospace" font-weight="bold">ZOMBIE ZONE</text>
+                <!-- Dots -->
                 <circle
-                  v-for="p in matrixPoints"
-                  :key="p.entity_id"
+                  v-for="p in matrixPoints" :key="p.entity_id"
                   :cx="xScale(p.x_dependency_ratio)"
                   :cy="yScale(p.y_months_funding_to_last_activity)"
                   :r="dotRadius(p)"
                   :fill="statusColor(p.review_status)"
-                  stroke="#272727"
-                  stroke-width="2"
-                  opacity=".9"
+                  stroke="rgba(30,30,30,.6)" stroke-width="1.5"
+                  opacity=".88"
                   @click="openProfile(p.entity_id)"
                   style="cursor:pointer"
                 >
-                  <title>{{ p.canonical_name }} / {{ fmtPct(p.x_dependency_ratio) }} / {{ fmtMoney(p.total_public_funding) }}</title>
+                  <title>{{ p.canonical_name }} · Dependency {{ fmtPct(p.x_dependency_ratio) }} · {{ fmtMoney(p.total_public_funding) }} · Score {{ p.score }}</title>
                 </circle>
-                <text x="20" y="536" class="mono" fill="#585858" font-size="16">0% dependency</text>
-                <text x="790" y="536" class="mono" fill="#585858" font-size="16">100% dependency</text>
-                <text x="18" y="24" class="mono" fill="#585858" font-size="16">short activity window</text>
-                <text x="18" y="510" class="mono" fill="#585858" font-size="16">longer observed activity</text>
+                <!-- Axis labels -->
+                <text x="16" y="500" fill="#888" font-size="13" font-family="monospace">0% dependency →</text>
+                <text x="840" y="500" fill="#888" font-size="13" font-family="monospace">100%</text>
+                <text x="14" y="20" fill="#888" font-size="13" font-family="monospace">0 mo post-funding</text>
+                <text x="14" y="490" fill="#888" font-size="13" font-family="monospace">60+ mo observed</text>
               </svg>
             </div>
             <div class="matrix-labels mono">
-              <span><i class="legend-dot" style="background:#932f2f"></i>High</span>
-              <span><i class="legend-dot" style="background:#9b7b29"></i>Medium</span>
-              <span><i class="legend-dot" style="background:#637f57"></i>Low</span>
-              <span>X: dependency ratio</span>
-              <span>Y: months to last observed activity</span>
-              <span>Size: public funding</span>
+              <span><i class="legend-dot" style="background:#932f2f"></i>High priority</span>
+              <span><i class="legend-dot" style="background:#8a6b1e"></i>Medium priority</span>
+              <span><i class="legend-dot" style="background:#476b36"></i>Low priority</span>
+              <span>X: dependency ratio &nbsp;·&nbsp; Y: months to last activity &nbsp;·&nbsp; Size: total funding</span>
             </div>
           </div>
         </div>
 
+        <!-- Right: Triage + review feed -->
         <div class="side-stack">
+          <!-- Triage agent -->
           <div class="panel">
             <div class="panel-head">
-              <div><div class="label">Highest Exposure</div><h3>Review feed</h3></div>
-              <button class="btn ghost" @click="page = 'research'">Research</button>
+              <div>
+                <div class="label">Triage Agent</div>
+                <h4>Surface the most concerning cases</h4>
+              </div>
+              <button class="btn sm accent-btn" @click="runTriage" :disabled="loading || triaging">
+                {{ triaging ? 'Running…' : 'Run triage' }}
+              </button>
+            </div>
+            <div class="triage-panel">
+              <div v-if="triageResult" class="triage-queue">
+                <div v-for="c in triageResult.cases.slice(0,8)" :key="c.entity_id" class="triage-row" @click="openProfile(c.entity_id)">
+                  <div>
+                    <div class="org-name" style="font-size:13px">{{ c.canonical_name }}</div>
+                    <div class="sub" style="font-size:11px">{{ c.rationale }}</div>
+                  </div>
+                  <span class="status" :class="c.review_status || 'medium'">{{ c.score }}</span>
+                  <span class="tag">{{ c.top_flag }}</span>
+                </div>
+              </div>
+              <div v-else class="sub" style="font-size:12px;padding-top:4px">
+                Click "Run triage" to have the agent rank the highest-risk cases automatically.
+              </div>
+            </div>
+          </div>
+
+          <!-- Review feed -->
+          <div class="panel">
+            <div class="panel-head">
+              <div><div class="label">Highest Exposure</div><h4>Review feed</h4></div>
+              <button class="btn sm ghost" @click="page='research'">Research →</button>
             </div>
             <div class="table-scroll">
               <table>
                 <thead><tr><th>Recipient</th><th class="num">Funding</th><th>Signal</th></tr></thead>
                 <tbody>
-                  <tr v-for="row in queue.slice(0, 12)" :key="row.entity_id" class="clickable" @click="openProfile(row.entity_id)">
-                    <td><div class="org-name">{{ row.canonical_name }}</div><div class="sub">#{{ row.entity_id }} / {{ row.last_public_funding_date || 'No date' }}</div></td>
+                  <tr v-for="row in queue.slice(0,16)" :key="row.entity_id" class="clickable" @click="openProfile(row.entity_id)">
+                    <td>
+                      <div class="org-name">{{ row.canonical_name }}</div>
+                      <div class="sub">#{{ row.entity_id }} · {{ row.last_public_funding_date || 'No date' }}</div>
+                    </td>
                     <td class="num">{{ fmtMoney(row.total_external_public_funding) }}</td>
-                    <td><span class="tag">{{ row.top_flag }}</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="panel-head">
-              <div><div class="label">Preemptive Oversight</div><h3>Flagged, not actioned</h3></div>
-              <button class="btn ghost" @click="openOversight">Open</button>
-            </div>
-            <div class="table-scroll">
-              <table>
-                <thead><tr><th>Recipient</th><th>Days</th><th>Status</th></tr></thead>
-                <tbody>
-                  <tr v-for="row in (oversightRows.length ? oversightRows : queue).slice(0, 8)" :key="row.entity_id" class="clickable" @click="openProfile(row.entity_id)">
-                    <td><div class="org-name">{{ row.canonical_name }}</div><div class="sub">{{ row.top_flag }}</div></td>
-                    <td class="num">{{ row.days_since_raised ?? 0 }}</td>
-                    <td><span class="status medium">{{ row.current_review_status || row.review_priority }}</span></td>
+                    <td><span class="status" :class="row.review_status">{{ row.top_flag }}</span></td>
                   </tr>
                 </tbody>
               </table>
@@ -586,130 +598,304 @@
       </div>
     </section>
 
-    <section v-if="page === 'research'" class="page research-page">
-      <aside class="panel panel-pad">
-        <div class="label">Research</div>
-        <h2>Find recipients</h2>
-        <p class="sub">Search, open a case, and add up to three organizations to comparison.</p>
-        <div class="control-row">
-          <input v-model="query" @keydown.enter="search" placeholder="Search organization or BN">
-          <button class="btn" @click="search" :disabled="loading">Search</button>
+    <!-- ═══════════════════════ RESEARCH ═══════════════════════ -->
+    <section v-if="page==='research'" class="page research-page">
+
+      <!-- Left sidebar -->
+      <div class="panel sidebar">
+        <div class="sidebar-head">
+          <div class="label">Research</div>
+          <h3>Find recipients</h3>
+          <div class="search-row">
+            <input v-model="query" @keydown.enter="search" placeholder="Name or BN…">
+            <button class="btn" @click="search" :disabled="loading">Go</button>
+          </div>
         </div>
-        <div class="scroll" style="height:260px">
+
+        <div class="search-results">
           <table v-if="searchResults.length">
             <tbody>
-              <tr v-for="r in searchResults" :key="r.id" class="clickable" @click="openProfile(r.id)">
-                <td><div class="org-name">{{ r.canonical_name }}</div><div class="sub">#{{ r.id }} / BN {{ r.bn_root || 'Unavailable' }}</div></td>
-                <td><button class="btn ghost" @click.stop="addCompareResult(r)">Compare</button></td>
+              <tr v-for="r in searchResults" :key="r.id" class="clickable" :class="{selected: selectedId===r.id}" @click="openProfile(r.id)">
+                <td>
+                  <div class="org-name" style="font-size:14px">{{ r.canonical_name }}</div>
+                  <div class="sub">BN {{ r.bn_root || '—' }} · {{ r.dataset_sources?.join(', ') }}</div>
+                </td>
+                <td style="width:70px;text-align:right;vertical-align:middle">
+                  <button class="btn sm ghost" @click.stop="addCompareResult(r)" title="Add to compare">+</button>
+                </td>
               </tr>
             </tbody>
           </table>
-          <div v-else class="empty">Search or select from the queue below.</div>
+          <div v-else class="empty" style="border:0">Type a name or BN above.</div>
         </div>
+
         <div class="compare-bar">
           <div class="compare-slots">
-            <div v-for="slot in compareSlots" :key="slot.id" class="slot">
-              <div class="small-caps">Compare</div>
-              <div>{{ slot.name }}</div>
-            </div>
+            <div v-if="!compareSlots.length" class="sub" style="font-size:11px">Add up to 3 orgs to compare</div>
+            <div v-for="slot in compareSlots" :key="slot.id" class="slot" :title="slot.name">{{ slot.name }}</div>
           </div>
-          <button class="btn accent-btn" @click="runCompare" :disabled="compareSlots.length < 2 || loading">Compare</button>
-          <button class="btn ghost" @click="compareSlots = []; comparison = null">Clear</button>
+          <button class="btn sm accent-btn" @click="runCompare" :disabled="compareSlots.length < 2 || loading">Compare</button>
+          <button class="btn sm ghost" @click="compareSlots=[]; comparison=null">✕</button>
         </div>
-        <div class="table-scroll" style="height:calc(100% - 470px); margin-top:14px">
+
+        <div class="queue-list">
           <table>
-            <thead><tr><th>Queue</th><th class="num">Funding</th></tr></thead>
+            <thead><tr><th>Queue</th><th class="num">Funding</th><th>Score</th></tr></thead>
             <tbody>
-              <tr v-for="row in queue" :key="row.entity_id" class="clickable" @click="openProfile(row.entity_id)">
-                <td><div class="org-name">{{ row.canonical_name }}</div><div class="sub">{{ row.top_flag }}</div></td>
+              <tr v-for="row in queue" :key="row.entity_id" class="clickable" :class="{selected: selectedId===row.entity_id}" @click="openProfile(row.entity_id)">
+                <td>
+                  <div class="org-name" style="font-size:14px">{{ row.canonical_name }}</div>
+                  <div class="sub">{{ row.top_flag }}</div>
+                </td>
                 <td class="num">{{ fmtMoney(row.total_external_public_funding) }}</td>
+                <td class="num"><span class="status" :class="row.review_status">{{ row.score }}</span></td>
               </tr>
             </tbody>
           </table>
         </div>
-      </aside>
+      </div>
 
-      <section class="panel profile-layout">
-        <div class="panel-head">
-          <div>
-            <div class="label">Case Workspace</div>
-            <h2>{{ profile ? profile.identity.canonical_name : 'Select a recipient' }}</h2>
-            <p v-if="profile">Entity #{{ profile.identity.entity_id }} / BN {{ profile.identity.bn_root || 'Unavailable' }}</p>
-          </div>
-          <div>
-            <button class="btn ghost" @click="addCurrentToCompare" :disabled="!profile">Add to compare</button>
-            <button class="btn accent-btn" @click="generateBinder" :disabled="!profile || loading">Generate binder</button>
-          </div>
-        </div>
+      <!-- Main case workspace -->
+      <div class="panel profile-layout">
 
-        <div v-if="comparison" class="scroll panel-pad">
-          <div class="section-title"><div class="label">Comparison Workspace</div><h2>Side-by-side recipients</h2></div>
+        <!-- Comparison view -->
+        <div v-if="comparison" style="flex:1;overflow:auto">
+          <div class="panel-head">
+            <div><div class="label">Comparison</div><h3>Side-by-side</h3></div>
+            <button class="btn sm ghost" @click="comparison=null">← Back to profile</button>
+          </div>
           <div class="comparison-grid">
             <div v-for="p in comparison.profiles" :key="p.identity.entity_id" class="compare-card">
-              <h3>{{ p.identity.canonical_name }}</h3>
-              <div class="fact-grid" style="margin-top:12px">
-                <div class="fact"><div class="metric-label">Funding</div><div class="value">{{ fmtMoney(p.funding.total_external_public_funding) }}</div></div>
-                <div class="fact"><div class="metric-label">Dependency</div><div class="value">{{ fmtPct(p.dependency.max_dependency_ratio) }}</div></div>
-                <div class="fact"><div class="metric-label">Score</div><div class="value">{{ p.score.total }}</div></div>
-                <div class="fact"><div class="metric-label">Last filing</div><div class="value">{{ p.filing_continuity.cra_last_filing_year || 'N/A' }}</div></div>
+              <div class="score-badge" :class="scoreBand(p.score.total)" style="margin-bottom:10px">
+                <span class="score-num">{{ p.score.total }}</span>
+                <span>{{ p.score.band }}</span>
               </div>
-              <div style="margin-top:12px"><span v-for="f in p.flags.slice(0, 6)" :key="f.code" class="tag">{{ f.code }}</span></div>
+              <h4 style="margin-bottom:10px">{{ p.identity.canonical_name }}</h4>
+              <div class="fact-grid">
+                <div class="fact"><div class="metric-label">Funding</div><div class="val" style="font-size:16px">{{ fmtMoney(p.funding.total_external_public_funding) }}</div></div>
+                <div class="fact"><div class="metric-label">Max dep.</div><div class="val" style="font-size:16px">{{ fmtPct(p.dependency.max_dependency_ratio) }}</div></div>
+                <div class="fact"><div class="metric-label">Last filing</div><div class="val" style="font-size:16px">{{ p.filing_continuity.cra_last_filing_year || 'N/A' }}</div></div>
+                <div class="fact"><div class="metric-label">Flags</div><div class="val" style="font-size:16px">{{ p.flags.length }}</div></div>
+              </div>
+              <div style="margin-top:10px">
+                <span v-for="f in p.flags.slice(0,4)" :key="f.code" class="status" :class="f.severity">{{ f.code }}</span>
+              </div>
+              <div style="margin-top:10px">
+                <button class="btn sm ghost" @click="openProfile(p.identity.entity_id)">Open case →</button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div v-else-if="profile" class="profile-grid">
-          <div class="scroll">
-            <div class="fact-grid">
-              <div class="fact"><div class="metric-label">Total funding</div><div class="value">{{ fmtMoney(profile.funding.total_external_public_funding) }}</div></div>
-              <div class="fact"><div class="metric-label">Largest event</div><div class="value">{{ fmtMoney(profile.funding.largest_public_funding_event_amount) }}</div></div>
-              <div class="fact"><div class="metric-label">Max dependency</div><div class="value">{{ fmtPct(profile.dependency.max_dependency_ratio) }}</div></div>
-              <div class="fact"><div class="metric-label">Score</div><div class="value">{{ profile.score.total }}</div></div>
+        <!-- Profile view -->
+        <template v-else-if="profile">
+          <!-- Header -->
+          <div class="profile-header">
+            <div class="profile-name-block">
+              <div class="eyebrow">Entity #{{ profile.identity.entity_id }} · BN {{ profile.identity.bn_root || 'Unavailable' }}</div>
+              <h2 style="margin-top:3px">{{ profile.identity.canonical_name }}</h2>
+              <div class="source-chips" style="margin-top:6px">
+                <span v-for="s in asArray(profile.identity.dataset_sources)" :key="s" class="chip">{{ s }}</span>
+              </div>
             </div>
-            <div class="panel-pad">
-              <div class="label">Defensible Flag Cards</div>
-              <div v-for="card in defensibleFlagCards" :key="card.code" class="flag-card">
-                <div class="flag-card-head">
-                  <div><strong>{{ card.label }}</strong><div class="sub">{{ card.code }}</div></div>
-                  <span class="status" :class="card.severity">{{ card.severity }} / {{ card.confidence.toFixed(2) }}</span>
+            <div class="profile-actions">
+              <div class="score-badge" :class="scoreBand(profile.score.total)">
+                <span class="score-num">{{ profile.score.total }}</span>
+                <span>{{ profile.score.band }}</span>
+              </div>
+              <button class="btn sm ghost" @click="addCurrentToCompare">+ Compare</button>
+              <button class="btn sm accent-btn" @click="generateBinder" :disabled="loading">Binder</button>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <button class="tab-btn" :class="{active: profileTab==='overview'}" @click="profileTab='overview'">Overview</button>
+            <button class="tab-btn" :class="{active: profileTab==='timeline'}" @click="profileTab='timeline'">Timeline</button>
+            <button class="tab-btn" :class="{active: profileTab==='flags'}" @click="profileTab='flags'">Flags ({{ profile.flags.length }})</button>
+            <button class="tab-btn" :class="{active: profileTab==='ai'}" @click="profileTab='ai'">AI Analysis</button>
+            <button class="tab-btn" :class="{active: profileTab==='review'}" @click="profileTab='review'">Review</button>
+          </div>
+
+          <!-- Tab: Overview -->
+          <div v-if="profileTab==='overview'" class="tab-content">
+            <div class="overview-grid">
+              <div class="overview-col">
+                <div class="small-caps" style="margin-bottom:10px">Key metrics</div>
+                <div class="fact-grid">
+                  <div class="fact"><div class="metric-label">Total public funding</div><div class="val">{{ fmtMoney(profile.funding.total_external_public_funding) }}</div></div>
+                  <div class="fact"><div class="metric-label">Largest single event</div><div class="val">{{ fmtMoney(profile.funding.largest_public_funding_event_amount) }}</div></div>
+                  <div class="fact"><div class="metric-label">Max gov't dependency</div><div class="val">{{ fmtPct(profile.dependency.max_dependency_ratio) }}</div></div>
+                  <div class="fact"><div class="metric-label">Last CRA filing</div><div class="val">{{ profile.filing_continuity.cra_last_filing_year || 'N/A' }}</div></div>
+                  <div class="fact"><div class="metric-label">Top funder</div><div class="val" style="font-size:13px;line-height:1.2">{{ shortFunder(profile.funding.top_funder_name) }}</div></div>
+                  <div class="fact"><div class="metric-label">Funder share</div><div class="val">{{ fmtPct(profile.funding.top_funder_share) }}</div></div>
                 </div>
-                <div class="flag-card-body">
-                  <div>
-                    <div class="small-caps">Confidence</div>
-                    <p>Confidence: {{ card.confidence.toFixed(2) }}. {{ card.confidenceText }}</p>
-                    <p class="sub">Historical uphold rate: unavailable until production review history exists.</p>
-                    <div class="small-caps">Citation chain</div>
-                    <a v-for="c in card.citations" :key="c" href="#" class="citation" @click.prevent>{{ c }}</a>
+              </div>
+              <div class="overview-col">
+                <div class="small-caps" style="margin-bottom:10px">Score breakdown — {{ profile.score.total }} pts total</div>
+                <div class="score-breakdown">
+                  <div v-for="comp in profile.score.components" :key="comp.name" class="score-component">
+                    <div class="score-component-head">
+                      <span>{{ comp.name }}</span>
+                      <span class="mono" style="font-size:10px">{{ comp.points }} / {{ comp.max_points }}</span>
+                    </div>
+                    <div class="score-bar-track">
+                      <div class="score-bar-fill" :class="scoreCompColor(comp)" :style="{width: (comp.max_points > 0 ? comp.points/comp.max_points*100 : 0)+'%'}"></div>
+                    </div>
                   </div>
+                </div>
+                <div style="margin-top:16px">
+                  <div class="small-caps" style="margin-bottom:8px">Data limitations</div>
+                  <div v-for="lim in profile.limitations" :key="lim" style="font-size:12px;line-height:1.45;color:var(--dark-border);margin-bottom:4px">{{ lim }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Timeline -->
+          <div v-if="profileTab==='timeline'" class="tab-content">
+            <div class="timeline-inner">
+
+              <!-- Funding events chart -->
+              <div v-if="fundingEvents.length">
+                <div class="chart-title">Funding events by year — {{ fmtMoney(profile.funding.total_external_public_funding) }} total</div>
+                <svg class="chart-svg" :viewBox="`0 0 ${fundingChartWidth} 120`" style="height:120px">
+                  <g v-for="(bar, i) in fundingBars" :key="bar.year">
+                    <rect :x="bar.x" y="0" :width="bar.w" :height="bar.h" fill="#932f2f" opacity=".75" rx="0"/>
+                    <text :x="bar.x + bar.w/2" :y="bar.h + 14" text-anchor="middle" fill="#555" font-size="9" font-family="monospace">{{ bar.year }}</text>
+                    <title>{{ bar.year }}: {{ fmtMoney(bar.amount) }}</title>
+                  </g>
+                  <line x1="0" :y1="100" :x2="fundingChartWidth" y2="100" stroke="var(--border)" stroke-width="1"/>
+                </svg>
+              </div>
+              <div v-else class="empty">No funding events in available data.</div>
+
+              <!-- Dependency ratio trend -->
+              <div v-if="dependencyRows.length">
+                <div class="chart-title">Government funding dependency by fiscal year</div>
+                <svg class="chart-svg" :viewBox="`0 0 ${depChartWidth} 100`" style="height:100px">
+                  <!-- Reference lines -->
+                  <line x1="0" :y1="depYScale(70)" :x2="depChartWidth" :y2="depYScale(70)" stroke="rgba(147,47,47,.4)" stroke-width="1" stroke-dasharray="4 3"/>
+                  <line x1="0" :y1="depYScale(80)" :x2="depChartWidth" :y2="depYScale(80)" stroke="rgba(147,47,47,.7)" stroke-width="1" stroke-dasharray="4 3"/>
+                  <text :x="depChartWidth-28" :y="depYScale(70)-3" fill="rgba(147,47,47,.8)" font-size="8" font-family="monospace">70%</text>
+                  <text :x="depChartWidth-28" :y="depYScale(80)-3" fill="rgba(147,47,47,.8)" font-size="8" font-family="monospace">80%</text>
+                  <!-- Bars -->
+                  <g v-for="(row, i) in depBars" :key="row.fiscal_year">
+                    <rect :x="row.x" :y="depYScale(row.ratio)" :width="row.w" :height="100-depYScale(row.ratio)" :fill="row.ratio >= 80 ? '#932f2f' : row.ratio >= 70 ? '#8a6b1e' : '#476b36'" opacity=".7"/>
+                    <text :x="row.x + row.w/2" y="92" text-anchor="middle" fill="#555" font-size="9" font-family="monospace">{{ row.fiscal_year }}</text>
+                    <title>{{ row.fiscal_year }}: {{ fmtPct(row.ratio) }}</title>
+                  </g>
+                </svg>
+              </div>
+              <div v-else class="empty">No dependency ratio data available (CRA data required).</div>
+
+              <!-- Filing continuity -->
+              <div>
+                <div class="chart-title">CRA filing continuity — observed window {{ profile.filing_continuity.cra_first_filing_year || '—' }} to {{ profile.filing_continuity.cra_last_filing_year || '—' }}</div>
+                <div class="filing-strip">
+                  <div v-for="cell in filingCells" :key="cell.year" class="filing-cell" :class="cell.filed ? 'filed' : 'gap'" :title="cell.filed ? `Filed ${cell.year}` : `Gap: no filing found for ${cell.year}`">
+                    {{ cell.year }}
+                  </div>
+                </div>
+                <div v-for="lim in profile.filing_continuity.filing_continuity_limitations" :key="lim" class="limitation-text" style="margin-top:8px">⚠ {{ lim }}</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Tab: Flags -->
+          <div v-if="profileTab==='flags'" class="tab-content">
+            <div class="flags-inner">
+              <div v-if="!profile.flags.length" class="empty">No flags raised for this organization.</div>
+              <div v-for="flag in profile.flags" :key="flag.code" class="flag-card">
+                <div class="flag-card-head">
                   <div>
-                    <div class="small-caps">Steel-man explanation</div>
-                    <p>{{ card.steelman }}</p>
-                    <div class="small-caps">Evidence</div>
-                    <p class="json-ish">{{ compact(card.evidence) }}</p>
+                    <div class="flag-label">{{ flag.label }}</div>
+                    <div class="flag-code">{{ flag.code }} · {{ flag.points }} pts</div>
+                  </div>
+                  <span class="status" :class="flag.severity">{{ flag.severity }} / {{ flag.points }}pts</span>
+                </div>
+                <div class="flag-body">
+                  <div class="flag-col">
+                    <div class="flag-col-title">Evidence</div>
+                    <div v-for="(ev, i) in flag.evidence" :key="i" class="evidence-row">{{ compact(ev) }}</div>
+                    <div v-for="src in flag.source_trace" :key="src.source_table" class="source-line">→ {{ src.source_table }}{{ src.fields ? ' [' + src.fields.join(', ') + ']' : '' }}</div>
+                  </div>
+                  <div class="flag-col">
+                    <div class="flag-col-title">Alternative interpretation</div>
+                    <div class="steelman-text">{{ steelmanForFlag(flag.code) }}</div>
+                    <div v-for="lim in flag.limitations" :key="lim" class="limitation-text">⚠ {{ lim }}</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="scroll">
-            <div class="panel-pad">
-              <div class="panel-head" style="padding:0 0 14px; border-bottom:0">
-                <div><div class="label">Agentic Review</div><h3>Investigation trace</h3></div>
-                <button class="btn accent-btn" @click="runInvestigation" :disabled="loading">Investigate</button>
+          <!-- Tab: AI Analysis -->
+          <div v-if="profileTab==='ai'" class="tab-content">
+            <div class="ai-inner">
+              <div class="ai-generate-area">
+                <button class="btn accent-btn" @click="generateAIExplanation" :disabled="aiExplaining || loading">
+                  {{ aiExplaining ? 'Generating…' : 'Generate AI explanation' }}
+                </button>
+                <span class="sub" style="font-size:12px">AI reads only structured profile data — no unsupported inferences.</span>
               </div>
-              <div v-if="agentTrace.length" class="agent-trace">
-                <div v-for="s in agentTrace" :key="s.step" class="trace-step">
-                  <div class="mono">Step {{ s.step }}</div>
-                  <div class="mono">{{ s.tool }}</div>
-                  <div class="json-ish">{{ compact(s.observation) }}</div>
+
+              <div v-if="aiExplanation && aiExplanation.available" class="ai-explanation">
+                <div class="ai-section">
+                  <div class="ai-section-title">Summary</div>
+                  <div class="ai-summary-text">{{ aiExplanation.summary }}</div>
+                </div>
+                <div v-if="aiExplanation.key_evidence?.length" class="ai-section">
+                  <div class="ai-section-title">Key evidence</div>
+                  <div v-for="ev in aiExplanation.key_evidence" :key="ev" class="ai-question">{{ ev }}</div>
+                </div>
+                <div v-if="aiExplanation.review_questions?.length" class="ai-section">
+                  <div class="ai-section-title">Review questions</div>
+                  <div v-for="q in aiExplanation.review_questions" :key="q" class="ai-question">{{ q }}</div>
+                </div>
+                <div v-if="aiExplanation.limitations?.length" class="ai-section">
+                  <div class="ai-section-title">Limitations</div>
+                  <div v-for="lim in aiExplanation.limitations" :key="lim" class="ai-limitation">{{ lim }}</div>
                 </div>
               </div>
-              <div v-else class="empty">Run the investigation agent to show the evidence walk.</div>
 
-              <div style="margin-top:18px">
-                <div class="label">Disposition + Attestation</div>
-                <div class="control-row" style="grid-template-columns:1fr 1fr">
+              <div v-else-if="aiExplanation && !aiExplanation.available" class="ai-unavail">
+                {{ aiExplanation.summary }}
+                <div style="margin-top:12px">
+                  <div class="small-caps" style="margin-bottom:6px">Default review questions</div>
+                  <div v-for="q in aiExplanation.review_questions" :key="q" class="ai-question" style="border-top:1px solid var(--border);padding:6px 0;font-size:13px">{{ q }}</div>
+                </div>
+              </div>
+
+              <div v-else class="empty">Click the button above to generate a grounded AI explanation for this case.</div>
+            </div>
+          </div>
+
+          <!-- Tab: Review -->
+          <div v-if="profileTab==='review'" class="tab-content">
+            <div class="review-inner">
+
+              <!-- Investigation agent -->
+              <div>
+                <div class="review-section-title">Investigation agent trace</div>
+                <div style="display:flex;gap:8px;margin-bottom:10px">
+                  <button class="btn sm accent-btn" @click="runInvestigation" :disabled="loading">Run investigation</button>
+                </div>
+                <div v-if="agentTrace.length" class="agent-trace">
+                  <div v-for="s in agentTrace" :key="s.step" class="trace-step">
+                    <div class="mono">Step {{ s.step }}</div>
+                    <div class="mono">{{ s.tool }}</div>
+                    <div class="json-ish">{{ compact(s.observation) }}</div>
+                  </div>
+                </div>
+                <div v-else class="empty">Run the investigation agent to show the evidence walk.</div>
+              </div>
+
+              <!-- Disposition -->
+              <div>
+                <div class="review-section-title">Disposition + Attestation</div>
+                <div class="disposition-grid">
                   <input v-model="reviewerName" placeholder="Reviewer name">
                   <select v-model="dispositionAction">
                     <option>Request more review</option>
@@ -721,45 +907,55 @@
                   </select>
                 </div>
                 <textarea v-model="reviewerNote" placeholder="Reviewer reasoning or note"></textarea>
-                <div style="display:flex; gap:10px; margin-top:10px">
-                  <button class="btn" @click="recordDisposition" :disabled="loading">Record disposition</button>
-                  <button class="btn ghost" @click="recordAttestation" :disabled="loading">Section 34 attestation</button>
+                <div style="display:flex;gap:8px;margin-top:8px">
+                  <button class="btn sm" @click="recordDisposition" :disabled="loading">Record disposition</button>
+                  <button class="btn sm ghost" @click="recordAttestation" :disabled="loading">Section 34 attestation</button>
                 </div>
               </div>
 
-              <div style="margin-top:18px">
-                <div class="label">Audit Trail</div>
+              <!-- Audit trail -->
+              <div>
+                <div class="review-section-title">Audit trail</div>
                 <div v-if="auditTrail.length" class="audit-list">
                   <div v-for="a in auditTrail" :key="a.id" class="audit-entry">
                     <div class="mono">{{ shortDate(a.timestamp) }}</div>
                     <div class="mono">{{ a.action_type }}</div>
-                    <div>{{ a.user_identity }} / {{ a.reviewer_note || 'No note' }}<div class="sub">Hash {{ a.record_hash }}</div></div>
+                    <div>{{ a.user_identity }} · {{ a.reviewer_note || 'No note' }}<div class="sub">{{ a.record_hash?.slice(0,12) }}…</div></div>
                   </div>
                 </div>
                 <div v-else class="empty">No review actions recorded yet.</div>
               </div>
+
             </div>
           </div>
+        </template>
+
+        <!-- Empty state -->
+        <div v-else class="panel-pad" style="flex:1;display:flex;align-items:center;justify-content:center">
+          <div class="empty" style="text-align:center;max-width:360px">
+            Select an organization from the queue or search.<br>
+            <span class="sub" style="font-size:12px">Or click a dot on the Zombie Quadrant.</span>
+          </div>
         </div>
 
-        <div v-else class="panel-pad"><div class="empty">Select an organization from search, queue, or the matrix.</div></div>
-      </section>
+      </div>
     </section>
 
-    <section v-if="page === 'oversight'" class="page oversight-page">
+    <!-- ═══════════════════════ OVERSIGHT ═══════════════════════ -->
+    <section v-if="page==='oversight'" class="page oversight-page">
       <div class="panel panel-pad">
-        <div class="panel-head" style="padding:0; border:0">
+        <div class="panel-head" style="padding:0;border:0">
           <div>
             <div class="label">Standing Internal Report</div>
-            <h2>Flagged but not yet actioned</h2>
+            <h2>Flagged, not yet actioned</h2>
             <p>Unresolved system-raised flags sorted by exposure and review urgency.</p>
           </div>
-          <button class="btn accent-btn" @click="loadOversight" :disabled="loading">Refresh report</button>
+          <button class="btn accent-btn" @click="loadOversight" :disabled="loading">Refresh</button>
         </div>
-        <div class="filter-grid" style="margin-top:14px">
+        <div class="filter-grid">
           <select v-model="filters.risk"><option value="">All risk levels</option><option>High</option><option>Medium</option><option>Low</option></select>
           <select v-model="filters.source"><option value="">All sources</option><option>cra</option><option>fed</option><option>ab</option></select>
-          <input v-model="filters.program" placeholder="Program/funder contains">
+          <input v-model="filters.program" placeholder="Flag contains…">
           <input v-model="filters.reviewer" placeholder="Reviewer">
           <input v-model.number="filters.days" type="number" min="0" placeholder="Min days raised">
         </div>
@@ -769,73 +965,69 @@
           <thead><tr><th>Organization</th><th>First raised</th><th>Days</th><th>Status</th><th>Reviewer</th><th class="num">Exposure</th><th>Signal</th></tr></thead>
           <tbody>
             <tr v-for="row in filteredOversight" :key="row.entity_id" class="clickable" @click="openProfile(row.entity_id)">
-              <td><div class="org-name">{{ row.canonical_name }}</div><div class="sub">#{{ row.entity_id }} / BN {{ row.bn_root || 'Unavailable' }}</div></td>
+              <td><div class="org-name">{{ row.canonical_name }}</div><div class="sub">#{{ row.entity_id }} · BN {{ row.bn_root || '—' }}</div></td>
               <td>{{ shortDate(row.flag_first_raised_at) }}</td>
-              <td class="num">{{ row.days_since_raised }}</td>
+              <td class="num">{{ row.days_since_raised ?? 0 }}</td>
               <td><span class="status medium">{{ row.current_review_status }}</span></td>
-              <td>{{ row.reviewer }}</td>
+              <td>{{ row.reviewer || '—' }}</td>
               <td class="num">{{ fmtMoney(row.total_external_public_funding) }}</td>
-              <td><span class="tag">{{ row.top_flag }}</span></td>
+              <td><span class="status" :class="row.review_status">{{ row.top_flag }}</span></td>
             </tr>
           </tbody>
         </table>
       </div>
     </section>
 
-    <section v-if="page === 'binder'" class="page binder-page printable-page">
+    <!-- ═══════════════════════ BINDER ═══════════════════════ -->
+    <section v-if="page==='binder'" class="page binder-page printable-page">
       <aside class="panel panel-pad">
         <div class="label">Committee Binder</div>
-        <h2>Briefing package</h2>
-        <p class="sub">Generate from a selected flagged organization. Use browser print to save as PDF.</p>
-        <div v-if="profile">
-          <p><strong>{{ profile.identity.canonical_name }}</strong></p>
-          <button class="btn accent-btn" @click="generateBinder" :disabled="loading">Generate committee binder</button>
-          <button class="btn ghost" style="margin-left:8px" @click="printBinder" :disabled="!binder">Print / Save PDF</button>
+        <h2 style="margin-top:6px">Briefing package</h2>
+        <p class="sub" style="margin-top:8px">Generate from a selected case. Use browser print to save PDF.</p>
+        <div style="margin-top:14px" v-if="profile">
+          <p style="margin-bottom:10px"><strong>{{ profile.identity.canonical_name }}</strong></p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn accent-btn" @click="generateBinder" :disabled="loading">Generate binder</button>
+            <button class="btn ghost" @click="printBinder" :disabled="!binder">Print / PDF</button>
+          </div>
         </div>
-        <div v-else class="empty">Select a case on Research first.</div>
+        <div v-else class="empty" style="margin-top:14px">Select a case on Research first.</div>
       </aside>
       <section class="binder-preview" v-if="binder">
         <h1>{{ binder.title }}</h1>
-        <p class="mono">Generated {{ binder.generated_at }}</p>
-        <div class="binder-section">
-          <h2>Organization Overview</h2>
+        <p class="mono" style="font-size:11px;margin-top:4px;color:#666">Generated {{ binder.generated_at }}</p>
+        <div class="binder-section"><h2>Organization Overview</h2>
           <p>{{ binder.organization_overview.canonical_name }} / Entity #{{ binder.organization_overview.entity_id }} / BN {{ binder.organization_overview.bn_root || 'Unavailable' }}</p>
         </div>
-        <div class="binder-section">
-          <h2>Issue Brief</h2>
+        <div class="binder-section"><h2>Issue Brief</h2>
           <p>{{ binder.issue_brief.plain_language }}</p>
           <p>Review priority: {{ binder.issue_brief.review_priority }} / Score {{ binder.issue_brief.score }}</p>
         </div>
-        <div class="binder-section">
-          <h2>Risk Summary</h2>
+        <div class="binder-section"><h2>Risk Summary</h2>
           <p>Total public funding: {{ fmtMoney(binder.risk_summary.funding.total_external_public_funding) }}</p>
-          <p>Max public-funding dependency: {{ fmtPct(binder.risk_summary.dependency.max_dependency_ratio) }}</p>
-          <p>Last CRA filing year: {{ binder.risk_summary.filing_continuity.cra_last_filing_year || 'Unavailable' }}</p>
-          <p><span v-for="f in binder.risk_summary.flags" :key="f.code" class="tag">{{ f.code }}</span></p>
+          <p>Max dependency: {{ fmtPct(binder.risk_summary.dependency.max_dependency_ratio) }}</p>
+          <p>Last CRA filing: {{ binder.risk_summary.filing_continuity.cra_last_filing_year || 'Unavailable' }}</p>
+          <p><span v-for="f in binder.risk_summary.flags" :key="f.code" class="status" :class="f.severity">{{ f.code }}</span></p>
         </div>
-        <div class="binder-section">
-          <h2>Supporting and Alternative Interpretations</h2>
-          <h3>Flagged interpretation</h3>
-          <ul><li v-for="i in binder.interpretations.flagged_interpretation" :key="i">{{ i }}</li></ul>
-          <h3>Alternative interpretation</h3>
-          <ul><li v-for="i in binder.interpretations.alternative_interpretation" :key="i">{{ i }}</li></ul>
+        <div class="binder-section"><h2>Interpretations</h2>
+          <h3>Flagged</h3><ul><li v-for="i in binder.interpretations.flagged_interpretation" :key="i">{{ i }}</li></ul>
+          <h3>Alternative</h3><ul><li v-for="i in binder.interpretations.alternative_interpretation" :key="i">{{ i }}</li></ul>
         </div>
-        <div class="binder-section">
-          <h2>Recommended Responses</h2>
+        <div class="binder-section"><h2>Recommended Responses</h2>
           <ul><li v-for="r in binder.recommended_responses" :key="r">{{ r }}</li></ul>
         </div>
-        <div class="binder-section">
-          <h2>Prior Dispositions / Audit Trail</h2>
-          <p v-if="!binder.prior_dispositions.length">No prior disposition recorded.</p>
+        <div class="binder-section"><h2>Prior Dispositions</h2>
+          <p v-if="!binder.prior_dispositions?.length">None recorded.</p>
           <ul><li v-for="a in binder.prior_dispositions" :key="a.id">{{ a.timestamp }} / {{ a.action_type }} / {{ a.user_identity }}</li></ul>
         </div>
       </section>
       <section v-else class="panel panel-pad"><div class="empty">No binder generated yet.</div></section>
     </section>
+
   </main>
 
-  <div v-if="loading" class="loading mono">Loading</div>
-  <div v-if="error" class="error">{{ error }}</div>
+  <div v-if="loading" class="loading-toast">Loading…</div>
+  <div v-if="error" class="error-toast" @click="error=''">{{ error }} ✕</div>
 </div>
 
 <script>
@@ -855,96 +1047,133 @@ createApp({
       searchResults: [],
       selectedId: null,
       profile: null,
+      profileTab: 'overview',
       agentTrace: [],
       auditTrail: [],
       compareSlots: [],
       comparison: null,
       binder: null,
+      aiExplanation: null,
+      aiExplaining: false,
+      triageResult: null,
+      triaging: false,
       reviewerName: 'Demo reviewer',
       reviewerNote: '',
       dispositionAction: 'Request more review',
       filters: { risk: '', source: '', program: '', reviewer: '', days: null }
     };
   },
+
   computed: {
     summary() {
       const rows = this.queue || [];
-      const funding = rows.reduce((sum, r) => sum + Number(r.total_external_public_funding || 0), 0);
+      const funding = rows.reduce((s, r) => s + Number(r.total_external_public_funding || 0), 0);
       const deps = rows.map(r => Number(r.max_public_funding_dependency_ratio)).filter(Number.isFinite);
       return {
         orgs: rows.length,
         funding,
         over80: deps.filter(v => v >= 80).length,
-        avgDependency: deps.length ? deps.reduce((a, b) => a + b, 0) / deps.length : null
+        highPriority: rows.filter(r => r.review_status === 'high').length,
       };
     },
     matrixPoints() {
       return (this.quadrant.points || [])
         .filter(p => p.x_dependency_ratio !== null && p.y_months_funding_to_last_activity !== null)
-        .slice(0, 120);
+        .slice(0, 150);
     },
     maxMatrixFunding() {
       return Math.max(1, ...this.matrixPoints.map(p => Number(p.total_public_funding || 0)));
     },
-    defensibleFlagCards() {
-      return (this.profile?.flags || []).map(flag => {
-        const confidence = flag.severity === 'high' ? 0.82 : flag.severity === 'medium' ? 0.68 : 0.55;
-        const citations = (flag.source_trace || []).map((s, i) => {
-          const table = s.source_table || s.source || 'structured_profile';
-          const fields = Array.isArray(s.fields) ? ` / ${s.fields.join(', ')}` : '';
-          return `Citation ${i + 1}: ${table}${fields}`;
-        });
-        if (!citations.length) citations.push(`Profile flag: ${flag.code}`);
-        return {
-          code: flag.code,
-          label: flag.label,
-          severity: flag.severity,
-          confidence,
-          confidenceText: 'Reflects deterministic threshold strength, source coverage, and whether the signal directly maps to challenge wording.',
-          citations,
-          evidence: flag.evidence || [],
-          steelman: this.steelmanForFlag(flag.code)
-        };
-      });
-    },
     filteredOversight() {
       return this.oversightRows.filter(row => {
-        const riskOk = !this.filters.risk || String(row.review_priority || '').toLowerCase().includes(this.filters.risk.toLowerCase());
-        const sourceOk = !this.filters.source || this.asArray(row.dataset_sources).includes(this.filters.source);
-        const programOk = !this.filters.program || String(row.top_flag || '').toLowerCase().includes(this.filters.program.toLowerCase());
-        const reviewerOk = !this.filters.reviewer || String(row.reviewer || '').toLowerCase().includes(this.filters.reviewer.toLowerCase());
-        const daysOk = !this.filters.days || Number(row.days_since_raised || 0) >= Number(this.filters.days);
-        return riskOk && sourceOk && programOk && reviewerOk && daysOk;
+        const rOk = !this.filters.risk || String(row.review_priority || '').toLowerCase().includes(this.filters.risk.toLowerCase());
+        const sOk = !this.filters.source || this.asArray(row.dataset_sources).includes(this.filters.source);
+        const pOk = !this.filters.program || String(row.top_flag || '').toLowerCase().includes(this.filters.program.toLowerCase());
+        const revOk = !this.filters.reviewer || String(row.reviewer || '').toLowerCase().includes(this.filters.reviewer.toLowerCase());
+        const dOk = !this.filters.days || Number(row.days_since_raised || 0) >= Number(this.filters.days);
+        return rOk && sOk && pOk && revOk && dOk;
       });
-    }
+    },
+    fundingEvents() {
+      return (this.profile?.funding?.events || []).filter(e => e.amount > 0 && e.year_label);
+    },
+    fundingBars() {
+      const byYear = {};
+      for (const ev of this.fundingEvents) {
+        byYear[ev.year_label] = (byYear[ev.year_label] || 0) + Number(ev.amount || 0);
+      }
+      const years = Object.keys(byYear).sort();
+      if (!years.length) return [];
+      const maxAmt = Math.max(...Object.values(byYear));
+      const bw = Math.max(20, Math.floor(900 / years.length) - 4);
+      return years.map((y, i) => ({
+        year: y,
+        amount: byYear[y],
+        x: i * (bw + 4) + 10,
+        w: bw,
+        h: Math.max(4, Math.round(byYear[y] / maxAmt * 90)),
+      }));
+    },
+    fundingChartWidth() {
+      const years = new Set((this.fundingEvents || []).map(e => e.year_label)).size;
+      return Math.max(400, years * 54 + 20);
+    },
+    dependencyRows() {
+      return this.profile?.dependency?.rows || [];
+    },
+    depChartWidth() {
+      return Math.max(300, this.dependencyRows.length * 60 + 40);
+    },
+    depBars() {
+      const rows = this.dependencyRows;
+      if (!rows.length) return [];
+      const bw = Math.max(24, Math.floor((this.depChartWidth - 40) / rows.length) - 4);
+      return rows.map((r, i) => ({
+        fiscal_year: r.fiscal_year,
+        ratio: r.govt_share_of_rev,
+        x: i * (bw + 4) + 10,
+        w: bw,
+      }));
+    },
+    filingCells() {
+      const f = this.profile?.filing_continuity;
+      if (!f?.cra_first_filing_year || !f?.cra_last_filing_year) return [];
+      const filed = new Set(f.cra_filing_years || []);
+      const cells = [];
+      for (let y = f.cra_first_filing_year; y <= f.cra_last_filing_year; y++) {
+        cells.push({ year: y, filed: filed.has(y) });
+      }
+      return cells;
+    },
   },
+
   async mounted() {
     await this.refresh();
     await this.loadOversight(false);
   },
+
   methods: {
     async fetchJson(url, options) {
       const res = await fetch(url, options);
-      if (!res.ok) throw new Error(`${url} returned ${res.status}`);
+      if (!res.ok) {
+        const text = await res.text().catch(() => res.status);
+        throw new Error(String(text || res.status).slice(0, 120));
+      }
       return res.json();
     },
     async refresh() {
-      this.loading = true;
-      this.error = '';
+      this.loading = true; this.error = '';
       try {
         const [health, queue, quadrant] = await Promise.all([
           this.fetchJson('/api/health'),
-          this.fetchJson('/api/review-queue?limit=40'),
-          this.fetchJson('/api/discover/zombie-quadrant?limit=120')
+          this.fetchJson('/api/review-queue?limit=50'),
+          this.fetchJson('/api/discover/zombie-quadrant?limit=150')
         ]);
         this.health = health;
         this.queue = queue.results || [];
         this.quadrant = quadrant;
-      } catch (e) {
-        this.error = e.message;
-      } finally {
-        this.loading = false;
-      }
+      } catch (e) { this.error = e.message; }
+      finally { this.loading = false; }
     },
     async openOversight() {
       this.page = 'oversight';
@@ -955,11 +1184,8 @@ createApp({
       try {
         const data = await this.fetchJson('/api/oversight/flagged-not-actioned?limit=100');
         this.oversightRows = data.results || [];
-      } catch (e) {
-        this.error = e.message;
-      } finally {
-        this.loading = false;
-      }
+      } catch (e) { this.error = e.message; }
+      finally { this.loading = false; }
     },
     async search() {
       if (!this.query.trim()) return;
@@ -967,32 +1193,49 @@ createApp({
       try {
         const data = await this.fetchJson(`/api/search?q=${encodeURIComponent(this.query.trim())}`);
         this.searchResults = data.results || [];
-      } catch (e) {
-        this.error = e.message;
-      } finally {
-        this.loading = false;
-      }
+      } catch (e) { this.error = e.message; }
+      finally { this.loading = false; }
     },
     async openProfile(id) {
-      this.loading = true;
-      this.error = '';
+      this.loading = true; this.error = '';
       this.page = 'research';
       this.selectedId = id;
       this.comparison = null;
       this.agentTrace = [];
+      this.aiExplanation = null;
+      this.profileTab = 'overview';
       try {
         this.profile = await this.fetchJson(`/api/entity/${id}/risk-profile`);
         await this.loadAuditTrail();
-      } catch (e) {
-        this.error = e.message;
-      } finally {
-        this.loading = false;
-      }
+      } catch (e) { this.error = e.message; }
+      finally { this.loading = false; }
     },
     async loadAuditTrail() {
       if (!this.profile) return;
-      const data = await this.fetchJson(`/api/entity/${this.profile.identity.entity_id}/audit-trail`);
-      this.auditTrail = data.entries || [];
+      try {
+        const data = await this.fetchJson(`/api/entity/${this.profile.identity.entity_id}/audit-trail`);
+        this.auditTrail = data.entries || [];
+      } catch (_) { this.auditTrail = []; }
+    },
+    async generateAIExplanation() {
+      if (!this.profile) return;
+      this.aiExplaining = true;
+      try {
+        const explanation = await this.fetchJson(`/api/entity/${this.profile.identity.entity_id}/risk-explanation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ risk_profile: this.profile })
+        });
+        this.aiExplanation = explanation;
+      } catch (e) { this.error = e.message; }
+      finally { this.aiExplaining = false; }
+    },
+    async runTriage() {
+      this.triaging = true;
+      try {
+        this.triageResult = await this.fetchJson('/api/agent/triage', { method: 'POST' });
+      } catch (e) { this.error = e.message; }
+      finally { this.triaging = false; }
     },
     addCompareResult(r) {
       this.addCompareSlot({ id: r.id, name: r.canonical_name });
@@ -1012,11 +1255,8 @@ createApp({
       try {
         const ids = this.compareSlots.map(s => s.id).join(',');
         this.comparison = await this.fetchJson(`/api/compare?ids=${ids}`);
-      } catch (e) {
-        this.error = e.message;
-      } finally {
-        this.loading = false;
-      }
+      } catch (e) { this.error = e.message; }
+      finally { this.loading = false; }
     },
     async runInvestigation() {
       if (!this.profile) return;
@@ -1024,11 +1264,8 @@ createApp({
       try {
         const data = await this.fetchJson(`/api/agent/investigate/${this.profile.identity.entity_id}`, { method: 'POST' });
         this.agentTrace = data.trace || [];
-      } catch (e) {
-        this.error = e.message;
-      } finally {
-        this.loading = false;
-      }
+      } catch (e) { this.error = e.message; }
+      finally { this.loading = false; }
     },
     async recordDisposition() {
       if (!this.profile) return;
@@ -1044,13 +1281,11 @@ createApp({
             reviewer_note: this.reviewerNote
           })
         });
+        this.reviewerNote = '';
         await this.loadAuditTrail();
         await this.loadOversight(false);
-      } catch (e) {
-        this.error = e.message;
-      } finally {
-        this.loading = false;
-      }
+      } catch (e) { this.error = e.message; }
+      finally { this.loading = false; }
     },
     async recordAttestation() {
       if (!this.profile) return;
@@ -1065,13 +1300,10 @@ createApp({
             funding_case: 'Section 34 spending approval review'
           })
         });
-        this.reviewerNote = `Attestation receipt: ${result.receipt.receipt_hash}`;
+        this.reviewerNote = `Attestation receipt: ${result.receipt?.receipt_hash || 'recorded'}`;
         await this.loadAuditTrail();
-      } catch (e) {
-        this.error = e.message;
-      } finally {
-        this.loading = false;
-      }
+      } catch (e) { this.error = e.message; }
+      finally { this.loading = false; }
     },
     async generateBinder() {
       if (!this.profile) return;
@@ -1080,63 +1312,76 @@ createApp({
         this.binder = await this.fetchJson(`/api/entity/${this.profile.identity.entity_id}/binder?user=${encodeURIComponent(this.reviewerName)}`);
         await this.loadAuditTrail();
         this.page = 'binder';
-      } catch (e) {
-        this.error = e.message;
-      } finally {
-        this.loading = false;
-      }
+      } catch (e) { this.error = e.message; }
+      finally { this.loading = false; }
     },
-    printBinder() {
-      window.print();
-    },
-    xScale(x) {
-      return Math.max(0, Math.min(100, Number(x || 0))) * 10;
-    },
+    printBinder() { window.print(); },
+
+    /* ── Scales ── */
+    xScale(x) { return Math.max(0, Math.min(100, Number(x || 0))) * 10; },
     yScale(months) {
       const capped = Math.max(0, Math.min(60, Number(months || 0)));
-      return capped / 60 * 560;
+      return capped / 60 * 520;
     },
     dotRadius(p) {
-      return 5 + Math.sqrt(Number(p.total_public_funding || 0) / this.maxMatrixFunding) * 24;
+      return 5 + Math.sqrt(Number(p.total_public_funding || 0) / this.maxMatrixFunding) * 22;
     },
+    depYScale(pct) { return Math.max(0, (100 - pct) / 100 * 80); },
+
+    /* ── Colors ── */
     statusColor(status) {
       if (status === 'high') return '#932f2f';
-      if (status === 'medium') return '#9b7b29';
-      return '#637f57';
+      if (status === 'medium') return '#8a6b1e';
+      return '#476b36';
     },
+    scoreBand(score) {
+      if (score >= 60) return 'high';
+      if (score >= 30) return 'medium';
+      return 'low';
+    },
+    scoreCompColor(comp) {
+      const ratio = comp.max_points > 0 ? comp.points / comp.max_points : 0;
+      if (ratio >= 0.75) return 'fill-high';
+      if (ratio >= 0.4) return 'fill-medium';
+      if (ratio > 0) return 'fill-low';
+      return 'fill-zero';
+    },
+
+    /* ── Text helpers ── */
     steelmanForFlag(code) {
-      if (code.includes('DEPENDENCY')) return 'The organization may be a legitimate public-service delivery partner whose revenue is expected to be mostly government-funded.';
-      if (code.includes('FILING') || code.includes('ACTIVITY')) return 'The available data may have reporting lag, incomplete coverage, a name change, merger, or a later filing not yet linked.';
-      if (code.includes('LARGE') || code.includes('CONCENTRATION')) return 'Large or concentrated funding may be normal for multi-year agreements, specialized providers, or major public programs.';
-      if (code.includes('MATCH') || code.includes('QUALITY')) return 'The signal may reflect source-data limitations or entity-resolution uncertainty rather than recipient behavior.';
-      return 'A cautious reviewer should verify source records before drawing any operational conclusion.';
+      if (code.includes('DEPENDENCY')) return 'The organization may be a legitimate public-service delivery partner whose revenue is structurally expected to be mostly government-funded (e.g., a government-mandated service provider).';
+      if (code.includes('FILING') || code.includes('ACTIVITY')) return 'CRA data has reporting lag and incomplete coverage. A name change, merger, or later filing not yet linked to this entity record may exist.';
+      if (code.includes('LARGE') || code.includes('CONCENTRATION')) return 'Large or concentrated funding may be entirely normal for multi-year agreements, specialized national programs, or sole-mandate providers.';
+      if (code.includes('MATCH') || code.includes('QUALITY') || code.includes('IDENTITY')) return 'The signal may reflect source-data limitations or entity-resolution uncertainty rather than recipient behaviour. Verify source records before drawing conclusions.';
+      return 'A cautious reviewer should verify source records and consult related entities before drawing any operational conclusion.';
+    },
+    shortFunder(name) {
+      if (!name) return '—';
+      const parts = name.split('|');
+      return parts[0].trim().slice(0, 40) + (parts[0].trim().length > 40 ? '…' : '');
     },
     asArray(value) {
       if (Array.isArray(value)) return value;
       if (!value) return [];
-      try { const parsed = JSON.parse(value); return Array.isArray(parsed) ? parsed : []; } catch { return []; }
+      try { const p = JSON.parse(value); return Array.isArray(p) ? p : []; } catch { return []; }
     },
     compact(value) {
+      if (typeof value === 'string') return value;
       return JSON.stringify(value || {}, null, 2);
     },
-    fmt(value) {
-      return new Intl.NumberFormat('en-CA').format(Number(value || 0));
-    },
+    fmt(value) { return new Intl.NumberFormat('en-CA').format(Number(value || 0)); },
     fmtPct(value) {
       if (value === null || value === undefined || value === '') return 'N/A';
       return `${Number(value).toFixed(1)}%`;
     },
     fmtMoney(value) {
       const n = Number(value || 0);
-      if (Math.abs(n) >= 1000000000) return `$${(n / 1000000000).toFixed(1)}B`;
-      if (Math.abs(n) >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
-      if (Math.abs(n) >= 1000) return `$${(n / 1000).toFixed(1)}K`;
+      if (Math.abs(n) >= 1e9) return `$${(n/1e9).toFixed(1)}B`;
+      if (Math.abs(n) >= 1e6) return `$${(n/1e6).toFixed(1)}M`;
+      if (Math.abs(n) >= 1e3) return `$${(n/1e3).toFixed(1)}K`;
       return `$${this.fmt(n)}`;
     },
-    shortDate(value) {
-      if (!value) return 'N/A';
-      return String(value).slice(0, 10);
-    }
+    shortDate(value) { return value ? String(value).slice(0, 10) : 'N/A'; }
   }
 }).mount('#app');
 </script>

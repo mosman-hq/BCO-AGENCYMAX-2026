@@ -837,17 +837,48 @@ function createBigQueryRiskService(options = {}) {
     return { generated_at: new Date().toISOString(), format: 'recipient-risk-case-file/v1', risk_profile: riskProfile };
   }
 
-  async function generateRiskExplanation() {
+  async function generateRiskExplanation(profile) {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    if (!apiKey) {
+      return {
+        available: false,
+        summary: 'AI explanation unavailable because no Gemini API key is configured.',
+        key_evidence: [],
+        review_questions: [
+          'Was the organization still active after the final public funding event?',
+          'Was public funding reported consistently in available CRA filings?',
+          'Should related entities or aliases be reviewed together?',
+        ],
+        limitations: ['Deterministic risk profile is still available and authoritative.'],
+      };
+    }
+
+    const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+    const prompt = [
+      'You are summarizing a structured public-funding recipient risk profile.',
+      'Use only the provided JSON evidence.',
+      'Do not infer fraud, abuse, corruption, misconduct, bankruptcy, or dissolution unless explicitly supported by source fields.',
+      'Use review-priority language. If evidence is missing, say it is missing.',
+      'Return strict JSON with keys: summary, key_evidence, review_questions, limitations.',
+      JSON.stringify(profile),
+    ].join('\n\n');
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+    });
+    if (!response.ok) throw new Error(`Gemini API error ${response.status}: ${await response.text()}`);
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.map(p => p.text).join('\n') || '{}';
+    const jsonText = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim();
+    const parsed = JSON.parse(jsonText);
     return {
-      available: false,
-      summary: 'AI explanation is not configured in the BigQuery backend yet. Deterministic risk profile remains authoritative.',
-      key_evidence: [],
-      review_questions: [
-        'Was the organization still active after the final public funding event?',
-        'Was public funding reported consistently in available CRA filings?',
-        'Should related entities or aliases be reviewed together?',
-      ],
-      limitations: ['AI summaries are optional and do not affect deterministic flags or scores.'],
+      available: true,
+      summary: parsed.summary || '',
+      key_evidence: Array.isArray(parsed.key_evidence) ? parsed.key_evidence : [],
+      review_questions: Array.isArray(parsed.review_questions) ? parsed.review_questions : [],
+      limitations: Array.isArray(parsed.limitations) ? parsed.limitations : [],
     };
   }
 

@@ -1,3 +1,7 @@
 node_modules/
 .env
 reports/
+
+# Runtime workflow state — regenerated on first server start
+visualizations/workflow-data/audit-log.jsonl
+visualizations/workflow-data/flag-state.json
