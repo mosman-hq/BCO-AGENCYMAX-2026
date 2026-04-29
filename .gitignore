@@ -1,5 +1,10 @@
 # Dependencies
 node_modules/
+package-lock.json
+
+# Next.js
+.next/
+out/
 
 # Environment files (personal overrides)
 .env

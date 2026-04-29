@@ -1,0 +1,94 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme inline {
+  --color-background: #FFFFFF;
+  --color-foreground: #1A1A1A;
+  --color-card: #FAF8F5;
+  --color-card-foreground: #1A1A1A;
+  --color-primary: #C41E3A;
+  --color-primary-foreground: #FFFFFF;
+  --color-muted: #FAF8F5;
+  --color-muted-foreground: #6B7280;
+  --color-border: rgba(196, 30, 58, 0.15);
+  --color-accent: #C41E3A;
+  --color-accent-foreground: #FFFFFF;
+  --color-destructive: #C41E3A;
+  --color-destructive-foreground: #FFFFFF;
+
+  --color-red-primary: #C41E3A;
+  --color-red-glow: rgba(196, 30, 58, 0.4);
+  --color-red-dim: rgba(196, 30, 58, 0.15);
+  --color-amber-warn: #C8922A;
+  --color-charcoal: #1A1A1A;
+  --color-card-bg: #FAF8F5;
+
+  --font-syne: "Syne", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --radius: 0px;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-syne);
+}
+
+@keyframes animation-path {
+  0% { offset-distance: 0%; }
+  100% { offset-distance: 100%; }
+}
+
+@keyframes scaleUp {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { filter: drop-shadow(0 0 3px #C41E3A); }
+  50% { filter: drop-shadow(0 0 10px #C41E3A); }
+}
+
+@keyframes chevron-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes terminal-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@utility animate-scaleUp {
+  animation: scaleUp 0.4s ease-out forwards;
+}
+
+@utility animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@utility animate-chevron {
+  animation: chevron-bounce 1.5s ease-in-out infinite;
+}
+
+@utility animate-terminal-blink {
+  animation: terminal-blink 1s step-end infinite;
+}
+
+@utility font-syne {
+  font-family: var(--font-syne);
+}
+
+@utility font-ibm {
+  font-family: var(--font-mono);
+}
