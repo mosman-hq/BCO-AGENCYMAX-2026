@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
-import { CircuitBg } from '@/components/ui/circuit-bg'
+import { SmokeBackground } from '@/components/ui/spooky-smoke-animation'
 
 interface AnimatedCounterProps {
   target: number
@@ -55,12 +55,17 @@ export default function HeroSection() {
   }
 
   return (
-    <section className="relative h-screen w-full overflow-hidden">
-      <CircuitBg />
+    <section style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
+      {/* Smoke WebGL background */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+        <SmokeBackground smokeColor="#C41E3A" />
+      </div>
 
-      <div className="absolute inset-0 bg-black/50" />
+      {/* Dark overlay */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'rgba(0,0,0,0.35)' }} />
 
-      <div className="relative z-10 flex flex-col items-center justify-center h-full px-6">
+      {/* Hero content */}
+      <div style={{ position: 'relative', zIndex: 2 }} className="flex flex-col items-center justify-center h-full px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -68,11 +73,28 @@ export default function HeroSection() {
           className="text-center"
         >
           <h1 className="font-syne text-5xl md:text-7xl lg:text-8xl font-800 text-white tracking-tight leading-none">
-            RECIPIENT RISK
+            <span
+              style={{
+                textShadow: '0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.4), 0 0 80px rgba(255,255,255,0.2)',
+              }}
+            >
+              RECIPIENT RISK
+            </span>
             <br />
-            <span className="text-red-primary">INTELLIGENCE</span>
+            <span
+              className="text-red-primary animate-pulse-red-glow"
+            >
+              INTELLIGENCE
+            </span>
           </h1>
-          <p className="font-ibm text-red-dim text-sm md:text-base mt-6 tracking-wider uppercase">
+          <p
+            className="font-ibm text-sm md:text-base mt-6 uppercase"
+            style={{
+              color: 'rgba(196,30,58,0.85)',
+              textShadow: '0 0 10px rgba(196,30,58,0.5)',
+              letterSpacing: '0.2em',
+            }}
+          >
             Tracking where public money disappears
           </p>
         </motion.div>
@@ -89,7 +111,8 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-              className="bg-white/95 border-l-4 border-l-red-primary p-5"
+              whileHover={{ boxShadow: '0 0 20px rgba(196,30,58,0.3)' }}
+              className="bg-white/95 border-l-4 border-l-red-primary p-5 transition-shadow"
             >
               <div className="font-ibm text-3xl md:text-4xl font-700 text-charcoal tabular-nums">
                 <AnimatedCounter
@@ -113,10 +136,23 @@ export default function HeroSection() {
           className="absolute bottom-10 flex flex-col items-center cursor-pointer"
           onClick={handleScrollClick}
         >
-          <span className="font-ibm text-xs text-red-dim uppercase tracking-[0.2em] mb-3">
+          <span
+            className="font-ibm text-xs uppercase mb-3"
+            style={{
+              color: 'rgba(196,30,58,0.7)',
+              textShadow: '0 0 8px rgba(196,30,58,0.5)',
+              letterSpacing: '0.2em',
+            }}
+          >
             Scroll to explore
           </span>
-          <ChevronDown className="w-6 h-6 text-red-dim animate-chevron" />
+          <ChevronDown
+            className="w-6 h-6 animate-chevron"
+            style={{
+              color: 'rgba(196,30,58,0.7)',
+              filter: 'drop-shadow(0 0 8px rgba(196,30,58,0.5))',
+            }}
+          />
         </motion.div>
       </div>
     </section>

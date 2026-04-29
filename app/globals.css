@@ -69,6 +69,22 @@ body {
   50% { opacity: 0; }
 }
 
+@keyframes pulse-red-glow {
+  0%, 100% {
+    text-shadow:
+      0 0 20px rgba(196,30,58,1),
+      0 0 40px rgba(196,30,58,0.8),
+      0 0 80px rgba(196,30,58,0.6);
+  }
+  50% {
+    text-shadow:
+      0 0 40px rgba(196,30,58,1),
+      0 0 80px rgba(196,30,58,1),
+      0 0 120px rgba(196,30,58,0.8),
+      0 0 160px rgba(196,30,58,0.4);
+  }
+}
+
 @utility animate-scaleUp {
   animation: scaleUp 0.4s ease-out forwards;
 }
@@ -83,6 +99,10 @@ body {
 
 @utility animate-terminal-blink {
   animation: terminal-blink 1s step-end infinite;
+}
+
+@utility animate-pulse-red-glow {
+  animation: pulse-red-glow 3s ease-in-out infinite;
 }
 
 @utility font-syne {
