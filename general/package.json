@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "AI For Accountability Hackathon — cross-dataset entity resolution pipeline (CRA + FED + AB)",
   "scripts": {
+    "dev": "node visualizations/server.js",
+    "start": "node visualizations/server.js",
     "migrate": "node scripts/01-migrate.js",
     "seed:ministries": "node scripts/02-seed-ministries.js",
     "setup": "npm run migrate && npm run seed:ministries",
